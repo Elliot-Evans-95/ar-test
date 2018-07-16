@@ -7,9 +7,10 @@ export default class BasicTorus extends baseEntity {
     this.mesh = this.getTorusMesh(scene, initialPosition);
     this.mesh.userData.parent = this;
   }
+
   getTorusMesh(scene, initialPosition) {
     const geometry = new THREE.TorusGeometry(0.4, 0.1, 20, 30);
-    const material = new THREE.MeshPhongMaterial({ color: 0xff5643 });
+    const material = new THREE.MeshPhongMaterial({ color: 0xffff00 });
     const torus = new THREE.Mesh(geometry, material);
     torus.position.copy(initialPosition);
     scene.add(torus);
