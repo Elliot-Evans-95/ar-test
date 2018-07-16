@@ -48132,7 +48132,7 @@
 	'use strict';
 	
 	Object.defineProperty(exports, "__esModule", {
-	  value: true
+	    value: true
 	});
 	
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -48156,43 +48156,47 @@
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 	
 	var BasicTorus = function (_baseEntity) {
-	  _inherits(BasicTorus, _baseEntity);
+	    _inherits(BasicTorus, _baseEntity);
 	
-	  function BasicTorus(name, scene, initialPosition) {
-	    _classCallCheck(this, BasicTorus);
+	    function BasicTorus(name, scene, initialPosition) {
+	        _classCallCheck(this, BasicTorus);
 	
-	    var _this = _possibleConstructorReturn(this, (BasicTorus.__proto__ || Object.getPrototypeOf(BasicTorus)).call(this, name));
+	        var _this = _possibleConstructorReturn(this, (BasicTorus.__proto__ || Object.getPrototypeOf(BasicTorus)).call(this, name));
 	
-	    _this.mesh = _this.getTorusMesh(scene, initialPosition);
-	    _this.mesh.userData.parent = _this;
-	    return _this;
-	  }
-	
-	  _createClass(BasicTorus, [{
-	    key: 'getTorusMesh',
-	    value: function getTorusMesh(scene, initialPosition) {
-	      var geometry = new THREE.TorusGeometry(0.4, 0.1, 20, 30);
-	      var material = new THREE.MeshPhongMaterial({ color: 0xff5643 });
-	      var torus = new THREE.Mesh(geometry, material);
-	      torus.position.copy(initialPosition);
-	      scene.add(torus);
-	      return torus;
+	        _this.mesh = _this.getTorusMesh(scene, initialPosition);
+	        _this.mesh.userData.parent = _this;
+	        _this.radius = 0.4;
+	        _this.tube = 0.1;
+	        _this.radialSegments = 20;
+	        _this.tubularSegments = 30;
+	        return _this;
 	    }
-	  }, {
-	    key: 'update',
-	    value: function update() {
-	      this.mesh.rotateY(0.1);
-	    }
-	  }, {
-	    key: 'dispose',
-	    value: function dispose() {
-	      this.mesh.geometry.dispose();
-	      this.mesh.material.dispose();
-	      this.mesh.dispose();
-	    }
-	  }]);
 	
-	  return BasicTorus;
+	    _createClass(BasicTorus, [{
+	        key: 'getTorusMesh',
+	        value: function getTorusMesh(scene, initialPosition) {
+	            var geometry = new THREE.TorusGeometry(this.radius, this.tube, this.radialSegments, this.tubularSegments);
+	            var material = new THREE.MeshPhongMaterial({ color: 0x0B5394 });
+	            var torus = new THREE.Mesh(geometry, material);
+	            torus.position.copy(initialPosition);
+	            scene.add(torus);
+	            return torus;
+	        }
+	    }, {
+	        key: 'update',
+	        value: function update() {
+	            this.mesh.rotateY(0.1);
+	        }
+	    }, {
+	        key: 'dispose',
+	        value: function dispose() {
+	            this.mesh.geometry.dispose();
+	            this.mesh.material.dispose();
+	            this.mesh.dispose();
+	        }
+	    }]);
+	
+	    return BasicTorus;
 	}(_BaseEntity2.default);
 	
 	exports.default = BasicTorus;
@@ -48239,7 +48243,7 @@
 	'use strict';
 	
 	Object.defineProperty(exports, "__esModule", {
-	  value: true
+	    value: true
 	});
 	
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -48255,49 +48259,56 @@
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 	
 	var Renderer = function () {
-	  function Renderer() {
-	    _classCallCheck(this, Renderer);
+	    function Renderer() {
+	        _classCallCheck(this, Renderer);
 	
-	    this.renderer = new THREE.WebGLRenderer({ alpha: true });
-	  }
+	        this.renderer = new THREE.WebGLRenderer({ alpha: true });
+	    }
 	
-	  _createClass(Renderer, [{
-	    key: 'initRenderer',
-	    value: function initRenderer() {
-	      var _this = this;
+	    _createClass(Renderer, [{
+	        key: 'initRenderer',
+	        value: function initRenderer() {
+	            var _this = this;
 	
-	      return _threeAr.ARUtils.getARDisplay().then(function (display) {
-	        if (display) {
-	          _this.vrDisplay = display;
-	          _this.setupRenderer();
-	          return true;
+	            return _threeAr.ARUtils.getARDisplay().then(function (display) {
+	                if (display) {
+	                    _this.vrDisplay = display;
+	                    Renderer.enableDebug();
+	                    _this.setupRenderer();
+	                    return true;
+	                }
+	                _threeAr.ARUtils.displayUnsupportedMessage();
+	                return false;
+	            });
 	        }
-	        _threeAr.ARUtils.displayUnsupportedMessage();
-	        return false;
-	      });
-	    }
-	  }, {
-	    key: 'setupRenderer',
-	    value: function setupRenderer() {
-	      this.renderer.setPixelRatio(window.devicePixelRatio);
-	      this.renderer.setSize(window.innerWidth, window.innerHeight);
-	      this.renderer.autoClear = false;
-	      this.canvas = this.renderer.domElement;
-	      document.body.appendChild(this.canvas);
-	      this.arView = new _threeAr.ARView(this.vrDisplay, this.renderer);
-	    }
-	  }, {
-	    key: 'update',
-	    value: function update(scene, camera, updateCallback) {
-	      this.renderer.clearColor();
-	      this.arView.render();
-	      this.renderer.clearDepth();
-	      this.renderer.render(scene, camera);
-	      this.vrDisplay.requestAnimationFrame(updateCallback);
-	    }
-	  }]);
+	    }, {
+	        key: 'setupRenderer',
+	        value: function setupRenderer() {
+	            this.renderer.setPixelRatio(window.devicePixelRatio);
+	            this.renderer.setSize(window.innerWidth, window.innerHeight);
+	            this.renderer.autoClear = false;
+	            this.canvas = this.renderer.domElement;
+	            document.body.appendChild(this.canvas);
+	            this.arView = new _threeAr.ARView(this.vrDisplay, this.renderer);
+	        }
+	    }, {
+	        key: 'update',
+	        value: function update(scene, camera, updateCallback) {
+	            this.renderer.clearColor();
+	            this.arView.render();
+	            this.renderer.clearDepth();
+	            this.renderer.render(scene, camera);
+	            this.vrDisplay.requestAnimationFrame(updateCallback);
+	        }
+	    }], [{
+	        key: 'enableDebug',
+	        value: function enableDebug() {
+	            var arDebug = new _threeAr.ARDebug(vrDisplay);
+	            document.body.appendChild(arDebug.getElement());
+	        }
+	    }]);
 	
-	  return Renderer;
+	    return Renderer;
 	}();
 	
 	exports.default = new Renderer();
