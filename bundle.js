@@ -69,7 +69,7 @@
 	'use strict';
 	
 	Object.defineProperty(exports, "__esModule", {
-	  value: true
+	    value: true
 	});
 	
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -103,67 +103,67 @@
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 	
 	var Engine = function () {
-	  function Engine() {
-	    _classCallCheck(this, Engine);
-	  }
+	    function Engine() {
+	        _classCallCheck(this, Engine);
+	    }
 	
-	  _createClass(Engine, [{
-	    key: 'start',
-	    value: function start() {
-	      var _this = this;
+	    _createClass(Engine, [{
+	        key: 'start',
+	        value: function start() {
+	            var _this = this;
 	
-	      _Renderer2.default.initRenderer().then(function (success) {
-	        if (success) {
-	          _this.buildCamera();
-	          _this.setupScene();
-	          _this.startUpdate();
+	            _Renderer2.default.initRenderer().then(function (success) {
+	                if (success) {
+	                    _this.buildCamera();
+	                    _this.setupScene();
+	                    _this.startUpdate();
+	                }
+	            });
 	        }
-	      });
-	    }
-	  }, {
-	    key: 'buildCamera',
-	    value: function buildCamera() {
-	      var camera = new _threeAr.ARPerspectiveCamera(_Renderer2.default.vrDisplay, 60, window.innerWidth / window.innerHeight, _Renderer2.default.vrDisplay.depthNear, _Renderer2.default.vrDisplay.depthFar);
-	      _EntityManager2.default.mainCamera = camera;
-	      this.vrControls = new _VRControls2.default(camera);
-	    }
-	  }, {
-	    key: 'setupScene',
-	    value: function setupScene() {
-	      this.scene = new THREE.Scene();
-	      _EntityManager2.default.addEntity(new _BasicTorus2.default('torus', this.scene, new THREE.Vector3(0, 0, -1.5)));
-	      var light = new THREE.PointLight(0xff0000, 1, 100);
-	      light.position.set(5, 5, 5);
-	      this.scene.add(light);
-	      this.scene.add(_EntityManager2.default.mainCamera);
-	    }
-	  }, {
-	    key: 'addCanvasEventHandlers',
-	    value: function addCanvasEventHandlers() {
-	      window.addEventListener('resize', this.onWindowResize, false);
-	    }
-	  }, {
-	    key: 'onWindowResize',
-	    value: function onWindowResize() {
-	      _EntityManager2.default.mainCamera.aspect = window.innerWidth / window.innerHeight;
-	      _EntityManager2.default.mainCamera.updateProjectionMatrix();
-	      _Renderer2.default.renderer.setSize(window.innerWidth, window.innerHeight);
-	    }
-	  }, {
-	    key: 'startUpdate',
-	    value: function startUpdate() {
-	      var currentInstance = this;
-	      this.update = function () {
-	        _EntityManager2.default.update();
-	        _EntityManager2.default.mainCamera.updateProjectionMatrix();
-	        currentInstance.vrControls.update();
-	        _Renderer2.default.update(currentInstance.scene, _EntityManager2.default.mainCamera, currentInstance.update);
-	      };
-	      this.update();
-	    }
-	  }]);
+	    }, {
+	        key: 'buildCamera',
+	        value: function buildCamera() {
+	            var camera = new _threeAr.ARPerspectiveCamera(_Renderer2.default.vrDisplay, 60, window.innerWidth / window.innerHeight, _Renderer2.default.vrDisplay.depthNear, _Renderer2.default.vrDisplay.depthFar);
+	            _EntityManager2.default.mainCamera = camera;
+	            this.vrControls = new _VRControls2.default(camera);
+	        }
+	    }, {
+	        key: 'setupScene',
+	        value: function setupScene() {
+	            this.scene = new THREE.Scene();
+	            _EntityManager2.default.addEntity(new _BasicTorus2.default('torus', this.scene, new THREE.Vector3(0, 0, -1.5)));
+	            var light = new THREE.PointLight(0xffff00, 1, 100);
+	            light.position.set(5, 5, 5);
+	            this.scene.add(light);
+	            this.scene.add(_EntityManager2.default.mainCamera);
+	        }
+	    }, {
+	        key: 'addCanvasEventHandlers',
+	        value: function addCanvasEventHandlers() {
+	            window.addEventListener('resize', this.onWindowResize, false);
+	        }
+	    }, {
+	        key: 'onWindowResize',
+	        value: function onWindowResize() {
+	            _EntityManager2.default.mainCamera.aspect = window.innerWidth / window.innerHeight;
+	            _EntityManager2.default.mainCamera.updateProjectionMatrix();
+	            _Renderer2.default.renderer.setSize(window.innerWidth, window.innerHeight);
+	        }
+	    }, {
+	        key: 'startUpdate',
+	        value: function startUpdate() {
+	            var currentInstance = this;
+	            this.update = function () {
+	                _EntityManager2.default.update();
+	                _EntityManager2.default.mainCamera.updateProjectionMatrix();
+	                currentInstance.vrControls.update();
+	                _Renderer2.default.update(currentInstance.scene, _EntityManager2.default.mainCamera, currentInstance.update);
+	            };
+	            this.update();
+	        }
+	    }]);
 	
-	  return Engine;
+	    return Engine;
 	}();
 	
 	exports.default = Engine;
