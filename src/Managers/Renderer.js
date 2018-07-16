@@ -10,7 +10,6 @@ class Renderer {
         return ARUtils.getARDisplay().then((display) => {
             if (display) {
                 this.vrDisplay = display;
-                Renderer.enableDebug();
                 this.setupRenderer();
                 return true;
             }
@@ -36,10 +35,6 @@ class Renderer {
         this.vrDisplay.requestAnimationFrame(updateCallback);
     }
 
-    static enableDebug() {
-        const arDebug = new ARDebug(vrDisplay);
-        document.body.appendChild(arDebug.getElement());
-    }
 }
 
 export default new Renderer();
