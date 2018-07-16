@@ -1,9 +1,8 @@
 {
   "env": {
     "browser": true,
-    "node": true,
+    "node": true
   },
-  "extends": "airbnb-base",
   "parserOptions": {
     "ecmaVersion": 8,
     "sourceType": "module"
