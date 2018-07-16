@@ -48163,31 +48163,12 @@
 	
 	        var _this = _possibleConstructorReturn(this, (BasicTorus.__proto__ || Object.getPrototypeOf(BasicTorus)).call(this, name));
 	
-	        _this.mesh = _this.getTorusMesh(scene, initialPosition);
+	        _this.mesh = BasicTorus.getTorusMesh(scene, initialPosition);
 	        _this.mesh.userData.parent = _this;
-	
-	        _this.torusProperties = {
-	            radius: 0.5,
-	            tube: 0.2,
-	            radialSegments: 50,
-	            tubularSegments: 50,
-	            arc: 5
-	        };
-	
 	        return _this;
 	    }
 	
 	    _createClass(BasicTorus, [{
-	        key: 'getTorusMesh',
-	        value: function getTorusMesh(scene, initialPosition) {
-	            var geometry = new THREE.TorusGeometry(this.torusProperties.radius, this.torusProperties.tube, this.torusProperties.radialSegments, this.torusProperties.tubularSegments);
-	            var material = new THREE.MeshPhongMaterial({ color: 0x0B5394 });
-	            var torus = new THREE.Mesh(geometry, material);
-	            torus.position.copy(initialPosition);
-	            scene.add(torus);
-	            return torus;
-	        }
-	    }, {
 	        key: 'update',
 	        value: function update() {
 	            this.mesh.rotateY(0.1);
@@ -48198,6 +48179,22 @@
 	            this.mesh.geometry.dispose();
 	            this.mesh.material.dispose();
 	            this.mesh.dispose();
+	        }
+	    }], [{
+	        key: 'getTorusMesh',
+	        value: function getTorusMesh(scene, initialPosition) {
+	            var torusProperties = {
+	                radius: 0.4,
+	                tube: 0.1,
+	                radialSegments: 20,
+	                tubularSegments: 30
+	            };
+	            var geometry = new THREE.TorusGeometry(torusProperties.radius, torusProperties.tube, torusProperties.radialSegments, torusProperties.tubularSegments);
+	            var material = new THREE.MeshPhongMaterial({ color: 0xFFA500 });
+	            var torus = new THREE.Mesh(geometry, material);
+	            torus.position.copy(initialPosition);
+	            scene.add(torus);
+	            return torus;
 	        }
 	    }]);
 	
