@@ -7,14 +7,19 @@ export default class BasicTorus extends baseEntity {
         super(name);
         this.mesh = this.getTorusMesh(scene, initialPosition);
         this.mesh.userData.parent = this;
-        this.radius = 0.4;
-        this.tube = 0.1;
-        this.radialSegments = 20;
-        this.tubularSegments = 30;
+        this.boxParameters = {
+            width: 10,
+            height: 10,
+            depth: 2,
+            widthSegments: 5,
+            heightSegments: 5,
+            depthSegments: 5
+        }
     }
 
     getTorusMesh(scene, initialPosition) {
-        const geometry = new THREE.TorusGeometry(this.radius, this.tube, this.radialSegments, this.tubularSegments);
+        const geometry = new THREE.BoxGeometry(this.boxParameters.width, this.boxParameters.height, this.boxParameters.depth, this.boxParameters.widthSegments,
+            this.boxParameters.heightSegments, this.boxParameters.depthSegments);
         const material = new THREE.MeshPhongMaterial({ color: 0x0B5394 });
         const torus = new THREE.Mesh(geometry, material);
         torus.position.copy(initialPosition);

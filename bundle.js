@@ -48165,17 +48165,21 @@
 	
 	        _this.mesh = _this.getTorusMesh(scene, initialPosition);
 	        _this.mesh.userData.parent = _this;
-	        _this.radius = 0.4;
-	        _this.tube = 0.1;
-	        _this.radialSegments = 20;
-	        _this.tubularSegments = 30;
+	        _this.boxParameters = {
+	            width: 10,
+	            height: 10,
+	            depth: 2,
+	            widthSegments: 5,
+	            heightSegments: 5,
+	            depthSegments: 5
+	        };
 	        return _this;
 	    }
 	
 	    _createClass(BasicTorus, [{
 	        key: 'getTorusMesh',
 	        value: function getTorusMesh(scene, initialPosition) {
-	            var geometry = new THREE.TorusGeometry(this.radius, this.tube, this.radialSegments, this.tubularSegments);
+	            var geometry = new THREE.BoxGeometry(this.boxParameters.width, this.boxParameters.height, this.boxParameters.depth, this.boxParameters.widthSegments, this.boxParameters.heightSegments, this.boxParameters.depthSegments);
 	            var material = new THREE.MeshPhongMaterial({ color: 0x0B5394 });
 	            var torus = new THREE.Mesh(geometry, material);
 	            torus.position.copy(initialPosition);
