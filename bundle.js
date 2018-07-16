@@ -48165,17 +48165,22 @@
 	
 	        _this.mesh = _this.getTorusMesh(scene, initialPosition);
 	        _this.mesh.userData.parent = _this;
-	        _this.radius = 0.4;
-	        _this.tube = 0.1;
-	        _this.radialSegments = 20;
-	        _this.tubularSegments = 30;
+	
+	        _this.torusProperties = {
+	            radius: 0.5,
+	            tube: 0.2,
+	            radialSegments: 50,
+	            tubularSegments: 50,
+	            arc: 5
+	        };
+	
 	        return _this;
 	    }
 	
 	    _createClass(BasicTorus, [{
 	        key: 'getTorusMesh',
 	        value: function getTorusMesh(scene, initialPosition) {
-	            var geometry = new THREE.TorusGeometry(this.radius, this.tube, this.radialSegments, this.tubularSegments);
+	            var geometry = new THREE.TorusGeometry(this.torusProperties.radius, this.torusProperties.tube, this.torusProperties.radialSegments, this.torusProperties.tubularSegments);
 	            var material = new THREE.MeshPhongMaterial({ color: 0x0B5394 });
 	            var torus = new THREE.Mesh(geometry, material);
 	            torus.position.copy(initialPosition);
