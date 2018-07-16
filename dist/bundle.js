@@ -48163,12 +48163,39 @@
 	
 	        var _this = _possibleConstructorReturn(this, (BasicTorus.__proto__ || Object.getPrototypeOf(BasicTorus)).call(this, name));
 	
-	        _this.mesh = BasicTorus.getTorusMesh(scene, initialPosition);
-	        _this.mesh.userData.parent = _this;
+	        _this.material = new THREE.MeshPhongMaterial({ color: 0xFFA500 });
+	        _this.mesh = _this.getTorusMesh(_this.material, scene, initialPosition);
+	
+	        setTimeout(function () {
+	            // this.dispose();
+	            _this.mesh.geometry.dispose();
+	            _this.mesh.material.dispose();
+	            _this.mesh.dispose();
+	
+	            _this.material = new THREE.MeshPhongMaterial({ color: 0xFF0000 });
+	            _this.mesh = _this.getTorusMesh(_this.material, scene, initialPosition);
+	        }, 2000);
+	
+	        // this.updateColor(scene, initialPosition);
 	        return _this;
 	    }
 	
 	    _createClass(BasicTorus, [{
+	        key: 'getTorusMesh',
+	        value: function getTorusMesh(material, scene, initialPosition) {
+	            var torusProperties = {
+	                radius: 0.4,
+	                tube: 0.1,
+	                radialSegments: 20,
+	                tubularSegments: 30
+	            };
+	            var geometry = new THREE.TorusGeometry(torusProperties.radius, torusProperties.tube, torusProperties.radialSegments, torusProperties.tubularSegments);
+	            var torus = new THREE.Mesh(geometry, material);
+	            torus.position.copy(initialPosition);
+	            scene.add(torus);
+	            return torus;
+	        }
+	    }, {
 	        key: 'update',
 	        value: function update() {
 	            this.mesh.rotateY(0.1);
@@ -48180,21 +48207,11 @@
 	            this.mesh.material.dispose();
 	            this.mesh.dispose();
 	        }
-	    }], [{
-	        key: 'getTorusMesh',
-	        value: function getTorusMesh(scene, initialPosition) {
-	            var torusProperties = {
-	                radius: 0.4,
-	                tube: 0.1,
-	                radialSegments: 20,
-	                tubularSegments: 30
-	            };
-	            var geometry = new THREE.TorusGeometry(torusProperties.radius, torusProperties.tube, torusProperties.radialSegments, torusProperties.tubularSegments);
-	            var material = new THREE.MeshPhongMaterial({ color: 0xFFA500 });
-	            var torus = new THREE.Mesh(geometry, material);
-	            torus.position.copy(initialPosition);
-	            scene.add(torus);
-	            return torus;
+	    }, {
+	        key: 'updateColor',
+	        value: function updateColor(scene, initialPosition) {
+	            this.material.color = 0xff5643;
+	            this.getTorusMesh(this.material, scene, initialPosition);
 	        }
 	    }]);
 	
