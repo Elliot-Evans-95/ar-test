@@ -48273,7 +48273,6 @@
 	            return _threeAr.ARUtils.getARDisplay().then(function (display) {
 	                if (display) {
 	                    _this.vrDisplay = display;
-	                    Renderer.enableDebug();
 	                    _this.setupRenderer();
 	                    return true;
 	                }
@@ -48299,12 +48298,6 @@
 	            this.renderer.clearDepth();
 	            this.renderer.render(scene, camera);
 	            this.vrDisplay.requestAnimationFrame(updateCallback);
-	        }
-	    }], [{
-	        key: 'enableDebug',
-	        value: function enableDebug() {
-	            var arDebug = new _threeAr.ARDebug(vrDisplay);
-	            document.body.appendChild(arDebug.getElement());
 	        }
 	    }]);
 	
