@@ -61,6 +61,10 @@
 	
 	var engine = new _Engine2.default();
 	engine.start();
+	
+	document.getElementById('updateColor').addEventListener('click', function () {
+	    engine.changeColor('torus');
+	});
 
 /***/ }),
 /* 2 */
@@ -148,6 +152,12 @@
 	            _EntityManager2.default.mainCamera.aspect = window.innerWidth / window.innerHeight;
 	            _EntityManager2.default.mainCamera.updateProjectionMatrix();
 	            _Renderer2.default.renderer.setSize(window.innerWidth, window.innerHeight);
+	        }
+	    }, {
+	        key: 'changeColor',
+	        value: function changeColor(entityName) {
+	            var entity = _EntityManager2.default.findByName(entityName);
+	            entity.material.color = new _three.Color(0xFF0000);
 	        }
 	    }, {
 	        key: 'startUpdate',
@@ -48147,16 +48157,11 @@
 	
 	var BasicTorus = function () {
 	    function BasicTorus(name, scene, initialPosition) {
-	        var _this = this;
-	
 	        _classCallCheck(this, BasicTorus);
 	
+	        this.name = name;
 	        this.material = new THREE.MeshPhongMaterial({ color: 0xFFA500 });
 	        this.mesh = this.getTorusMesh(this.material, scene, initialPosition);
-	
-	        setTimeout(function () {
-	            _this.updateColor();
-	        }, 2000);
 	    }
 	
 	    _createClass(BasicTorus, [{
@@ -48185,11 +48190,6 @@
 	            this.mesh.geometry.dispose();
 	            this.mesh.material.dispose();
 	            this.mesh.dispose();
-	        }
-	    }, {
-	        key: 'updateColor',
-	        value: function updateColor() {
-	            this.material.color = new _three.Color(0xFF0000);
 	        }
 	    }]);
 	
@@ -48275,7 +48275,7 @@
 	'use strict';
 	
 	Object.defineProperty(exports, "__esModule", {
-	  value: true
+	    value: true
 	});
 	
 	var _three = __webpack_require__(3);
@@ -48285,103 +48285,103 @@
 	function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 	
 	var VRControls = function VRControls(object, onError) {
-	  var scope = this;
+	    var scope = this;
 	
-	  var vrDisplay = void 0,
-	      vrDisplays = void 0;
+	    var vrDisplay = void 0,
+	        vrDisplays = void 0;
 	
-	  var standingMatrix = new THREE.Matrix4();
+	    var standingMatrix = new THREE.Matrix4();
 	
-	  var frameData = null;
+	    var frameData = null;
 	
-	  if ('VRFrameData' in window) {
-	    frameData = new VRFrameData();
-	  }
-	
-	  function gotVRDisplays(displays) {
-	    vrDisplays = displays;
-	
-	    if (displays.length > 0) {
-	      vrDisplay = displays[0];
-	    } else if (onError) onError('VR input not available.');
-	  }
-	
-	  if (navigator.getVRDisplays) {
-	    navigator.getVRDisplays().then(gotVRDisplays).catch(function () {
-	      console.warn('THREE.VRControls: Unable to get VR Displays');
-	    });
-	  }
-	
-	  // the Rift SDK returns the position in meters
-	  // this scale factor allows the user to define how meters
-	  // are converted to scene units.
-	
-	  this.scale = 1;
-	
-	  // If true will use "standing space" coordinate system where y=0 is the
-	  // floor and x=0, z=0 is the center of the room.
-	  this.standing = false;
-	
-	  // Distance from the users eyes to the floor in meters. Used when
-	  // standing=true but the VRDisplay doesn't provide stageParameters.
-	  this.userHeight = 1.6;
-	
-	  this.getVRDisplay = function () {
-	    return vrDisplay;
-	  };
-	
-	  this.setVRDisplay = function (value) {
-	    vrDisplay = value;
-	  };
-	
-	  this.getVRDisplays = function () {
-	    console.warn('THREE.VRControls: getVRDisplays() is being deprecated.');
-	    return vrDisplays;
-	  };
-	
-	  this.getStandingMatrix = function () {
-	    return standingMatrix;
-	  };
-	
-	  this.update = function () {
-	    if (vrDisplay) {
-	      var pose = void 0;
-	
-	      if (vrDisplay.getFrameData) {
-	        vrDisplay.getFrameData(frameData);
-	        pose = frameData.pose;
-	      } else if (vrDisplay.getPose) {
-	        pose = vrDisplay.getPose();
-	      }
-	
-	      if (pose.orientation !== null) {
-	        object.quaternion.fromArray(pose.orientation);
-	      }
-	
-	      if (pose.position !== null) {
-	        object.position.fromArray(pose.position);
-	      } else {
-	        object.position.set(0, 0, 0);
-	      }
-	
-	      if (this.standing) {
-	        if (vrDisplay.stageParameters) {
-	          object.updateMatrix();
-	
-	          standingMatrix.fromArray(vrDisplay.stageParameters.sittingToStandingTransform);
-	          object.applyMatrix(standingMatrix);
-	        } else {
-	          object.position.setY(object.position.y + this.userHeight);
-	        }
-	      }
-	
-	      object.position.multiplyScalar(scope.scale);
+	    if ('VRFrameData' in window) {
+	        frameData = new VRFrameData();
 	    }
-	  };
 	
-	  this.dispose = function () {
-	    vrDisplay = null;
-	  };
+	    function gotVRDisplays(displays) {
+	        vrDisplays = displays;
+	
+	        if (displays.length > 0) {
+	            vrDisplay = displays[0];
+	        } else if (onError) onError('VR input not available.');
+	    }
+	
+	    if (navigator.getVRDisplays) {
+	        navigator.getVRDisplays().then(gotVRDisplays).catch(function () {
+	            console.warn('THREE.VRControls: Unable to get VR Displays');
+	        });
+	    }
+	
+	    // the Rift SDK returns the position in meters
+	    // this scale factor allows the user to define how meters
+	    // are converted to scene units.
+	
+	    this.scale = 1;
+	
+	    // If true will use "standing space" coordinate system where y=0 is the
+	    // floor and x=0, z=0 is the center of the room.
+	    this.standing = false;
+	
+	    // Distance from the users eyes to the floor in meters. Used when
+	    // standing=true but the VRDisplay doesn't provide stageParameters.
+	    this.userHeight = 1.6;
+	
+	    this.getVRDisplay = function () {
+	        return vrDisplay;
+	    };
+	
+	    this.setVRDisplay = function (value) {
+	        vrDisplay = value;
+	    };
+	
+	    this.getVRDisplays = function () {
+	        console.warn('THREE.VRControls: getVRDisplays() is being deprecated.');
+	        return vrDisplays;
+	    };
+	
+	    this.getStandingMatrix = function () {
+	        return standingMatrix;
+	    };
+	
+	    this.update = function () {
+	        if (vrDisplay) {
+	            var pose = void 0;
+	
+	            if (vrDisplay.getFrameData) {
+	                vrDisplay.getFrameData(frameData);
+	                pose = frameData.pose;
+	            } else if (vrDisplay.getPose) {
+	                pose = vrDisplay.getPose();
+	            }
+	
+	            if (pose.orientation !== null) {
+	                object.quaternion.fromArray(pose.orientation);
+	            }
+	
+	            if (pose.position !== null) {
+	                object.position.fromArray(pose.position);
+	            } else {
+	                object.position.set(0, 0, 0);
+	            }
+	
+	            if (this.standing) {
+	                if (vrDisplay.stageParameters) {
+	                    object.updateMatrix();
+	
+	                    standingMatrix.fromArray(vrDisplay.stageParameters.sittingToStandingTransform);
+	                    object.applyMatrix(standingMatrix);
+	                } else {
+	                    object.position.setY(object.position.y + this.userHeight);
+	                }
+	            }
+	
+	            object.position.multiplyScalar(scope.scale);
+	        }
+	    };
+	
+	    this.dispose = function () {
+	        vrDisplay = null;
+	    };
 	}; /* eslint-disable */
 	/**
 	 * @author dmarcos / https://github.com/dmarcos

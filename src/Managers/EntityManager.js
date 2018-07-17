@@ -4,7 +4,7 @@ class EntityManager {
   }
 
   addEntity(ent) {
-    this.entities.push(ent);
+      this.entities.push(ent);
   }
 
   removeEntity(entity) {

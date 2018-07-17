@@ -4,6 +4,7 @@ import entityManager from './EntityManager';
 import BasicTorus from '../Entities/BasicTorus';
 import renderer from './Renderer';
 import VRControls from '../Utils/VRControls';
+import {Color} from 'three';
 
 export default class Engine {
     start() {
@@ -45,6 +46,11 @@ export default class Engine {
         entityManager.mainCamera.aspect = window.innerWidth / window.innerHeight;
         entityManager.mainCamera.updateProjectionMatrix();
         renderer.renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    changeColor(entityName) {
+        const entity = entityManager.findByName(entityName);
+        entity.material.color = new Color(0xFF0000);
     }
 
     startUpdate() {
