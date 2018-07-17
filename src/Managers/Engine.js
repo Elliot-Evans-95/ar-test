@@ -48,9 +48,9 @@ export default class Engine {
         renderer.renderer.setSize(window.innerWidth, window.innerHeight);
     }
 
-    changeColor(entityName) {
+    changeColor(entityName, color) {
         const entity = entityManager.findByName(entityName);
-        entity.material.color = new Color(0xFF0000);
+        entity.material.color = new Color(color);
     }
 
     startUpdate() {

@@ -23,7 +23,7 @@ class BasicTorus {
     }
 
     update() {
-        this.mesh.rotateY(0.1);
+
     }
 
     dispose() {

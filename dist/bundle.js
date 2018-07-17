@@ -62,8 +62,10 @@
 	var engine = new _Engine2.default();
 	engine.start();
 	
-	document.getElementById('updateColor').addEventListener('click', function () {
-	    engine.changeColor('torus');
+	document.getElementsByName('updateColor').forEach(function (button) {
+	    button.addEventListener('click', function (event) {
+	        engine.changeColor('torus', event.target.value);
+	    });
 	});
 
 /***/ }),
@@ -155,9 +157,9 @@
 	        }
 	    }, {
 	        key: 'changeColor',
-	        value: function changeColor(entityName) {
+	        value: function changeColor(entityName, color) {
 	            var entity = _EntityManager2.default.findByName(entityName);
-	            entity.material.color = new _three.Color(0xFF0000);
+	            entity.material.color = new _three.Color(0xff0000);
 	        }
 	    }, {
 	        key: 'startUpdate',
@@ -48181,9 +48183,7 @@
 	        }
 	    }, {
 	        key: 'update',
-	        value: function update() {
-	            this.mesh.rotateY(0.1);
-	        }
+	        value: function update() {}
 	    }, {
 	        key: 'dispose',
 	        value: function dispose() {
