@@ -88,11 +88,11 @@
 	
 	var _BasicTorus2 = _interopRequireDefault(_BasicTorus);
 	
-	var _Renderer = __webpack_require__(8);
+	var _Renderer = __webpack_require__(7);
 	
 	var _Renderer2 = _interopRequireDefault(_Renderer);
 	
-	var _VRControls = __webpack_require__(9);
+	var _VRControls = __webpack_require__(8);
 	
 	var _VRControls2 = _interopRequireDefault(_VRControls);
 	
@@ -48141,43 +48141,22 @@
 	
 	var THREE = _interopRequireWildcard(_three);
 	
-	var _BaseEntity = __webpack_require__(7);
-	
-	var _BaseEntity2 = _interopRequireDefault(_BaseEntity);
-	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-	
 	function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 	
-	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-	
-	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-	
-	var BasicTorus = function (_baseEntity) {
-	    _inherits(BasicTorus, _baseEntity);
-	
+	var BasicTorus = function () {
 	    function BasicTorus(name, scene, initialPosition) {
+	        var _this = this;
+	
 	        _classCallCheck(this, BasicTorus);
 	
-	        var _this = _possibleConstructorReturn(this, (BasicTorus.__proto__ || Object.getPrototypeOf(BasicTorus)).call(this, name));
-	
-	        _this.material = new THREE.MeshPhongMaterial({ color: 0xFFA500 });
-	        _this.mesh = _this.getTorusMesh(_this.material, scene, initialPosition);
+	        this.material = new THREE.MeshPhongMaterial({ color: 0xFFA500 });
+	        this.mesh = this.getTorusMesh(this.material, scene, initialPosition);
 	
 	        setTimeout(function () {
-	            // this.dispose();
-	            _this.mesh.geometry.dispose();
-	            _this.mesh.material.dispose();
-	            _this.mesh.dispose();
-	
-	            _this.material = new THREE.MeshPhongMaterial({ color: 0xFF0000 });
-	            _this.mesh = _this.getTorusMesh(_this.material, scene, initialPosition);
+	            _this.updateColor();
 	        }, 2000);
-	
-	        // this.updateColor(scene, initialPosition);
-	        return _this;
 	    }
 	
 	    _createClass(BasicTorus, [{
@@ -48209,54 +48188,18 @@
 	        }
 	    }, {
 	        key: 'updateColor',
-	        value: function updateColor(scene, initialPosition) {
-	            this.material.color = 0xff5643;
-	            this.getTorusMesh(this.material, scene, initialPosition);
+	        value: function updateColor() {
+	            this.material.color = new _three.Color(0xFF0000);
 	        }
 	    }]);
 	
 	    return BasicTorus;
-	}(_BaseEntity2.default);
+	}();
 	
 	exports.default = BasicTorus;
 
 /***/ }),
 /* 7 */
-/***/ (function(module, exports) {
-
-	"use strict";
-	
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	
-	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-	
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-	
-	var BaseEntity = function () {
-	  function BaseEntity(name) {
-	    _classCallCheck(this, BaseEntity);
-	
-	    this.name = name;
-	    this.id = Math.round(Math.random() * 100) + 1;
-	  }
-	
-	  _createClass(BaseEntity, [{
-	    key: "update",
-	    value: function update() {}
-	  }, {
-	    key: "dispose",
-	    value: function dispose() {}
-	  }]);
-	
-	  return BaseEntity;
-	}();
-	
-	exports.default = BaseEntity;
-
-/***/ }),
-/* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -48326,7 +48269,7 @@
 	exports.default = new Renderer();
 
 /***/ }),
-/* 9 */
+/* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
