@@ -61,6 +61,7 @@
 	
 	var engine = new _Engine2.default();
 	engine.start();
+	_Engine2.default.addCanvasEventHandlers();
 
 /***/ }),
 /* 2 */
@@ -88,11 +89,11 @@
 	
 	var _BasicTorus2 = _interopRequireDefault(_BasicTorus);
 	
-	var _Renderer = __webpack_require__(8);
+	var _Renderer = __webpack_require__(11);
 	
 	var _Renderer2 = _interopRequireDefault(_Renderer);
 	
-	var _VRControls = __webpack_require__(9);
+	var _VRControls = __webpack_require__(12);
 	
 	var _VRControls2 = _interopRequireDefault(_VRControls);
 	
@@ -124,35 +125,28 @@
 	        key: 'buildCamera',
 	        value: function buildCamera() {
 	            var camera = new _threeAr.ARPerspectiveCamera(_Renderer2.default.vrDisplay, 60, window.innerWidth / window.innerHeight, _Renderer2.default.vrDisplay.depthNear, _Renderer2.default.vrDisplay.depthFar);
+	
 	            _EntityManager2.default.mainCamera = camera;
 	            this.vrControls = new _VRControls2.default(camera);
 	        }
 	    }, {
 	        key: 'setupScene',
 	        value: function setupScene() {
-	            this.scene = new THREE.Scene();
-	            _EntityManager2.default.addEntity(new _BasicTorus2.default('torus', this.scene, new THREE.Vector3(0, 0, -1.5)));
 	            var light = new THREE.PointLight(0xffff00, 1, 100);
+	
+	            this.scene = new THREE.Scene();
+	
+	            _EntityManager2.default.addEntity(new _BasicTorus2.default('torus', 1, this.scene, new THREE.Vector3(0, 0, -1.5)));
 	            light.position.set(5, 5, 5);
+	
 	            this.scene.add(light);
 	            this.scene.add(_EntityManager2.default.mainCamera);
-	        }
-	    }, {
-	        key: 'addCanvasEventHandlers',
-	        value: function addCanvasEventHandlers() {
-	            window.addEventListener('resize', this.onWindowResize, false);
-	        }
-	    }, {
-	        key: 'onWindowResize',
-	        value: function onWindowResize() {
-	            _EntityManager2.default.mainCamera.aspect = window.innerWidth / window.innerHeight;
-	            _EntityManager2.default.mainCamera.updateProjectionMatrix();
-	            _Renderer2.default.renderer.setSize(window.innerWidth, window.innerHeight);
 	        }
 	    }, {
 	        key: 'startUpdate',
 	        value: function startUpdate() {
 	            var currentInstance = this;
+	
 	            this.update = function () {
 	                _EntityManager2.default.update();
 	                _EntityManager2.default.mainCamera.updateProjectionMatrix();
@@ -160,6 +154,18 @@
 	                _Renderer2.default.update(currentInstance.scene, _EntityManager2.default.mainCamera, currentInstance.update);
 	            };
 	            this.update();
+	        }
+	    }], [{
+	        key: 'addCanvasEventHandlers',
+	        value: function addCanvasEventHandlers() {
+	            window.addEventListener('resize', Engine.onWindowResize, false);
+	        }
+	    }, {
+	        key: 'onWindowResize',
+	        value: function onWindowResize() {
+	            _EntityManager2.default.mainCamera.aspect = window.innerWidth / window.innerHeight;
+	            _EntityManager2.default.mainCamera.updateProjectionMatrix();
+	            _Renderer2.default.renderer.setSize(window.innerWidth, window.innerHeight);
 	        }
 	    }]);
 	
@@ -48141,9 +48147,17 @@
 	
 	var THREE = _interopRequireWildcard(_three);
 	
-	var _BaseEntity = __webpack_require__(7);
+	__webpack_require__(7);
+	
+	__webpack_require__(8);
+	
+	var _BaseEntity = __webpack_require__(9);
 	
 	var _BaseEntity2 = _interopRequireDefault(_BaseEntity);
+	
+	var _DRACOLoader = __webpack_require__(10);
+	
+	var _DRACOLoader2 = _interopRequireDefault(_DRACOLoader);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -48158,44 +48172,103 @@
 	var BasicTorus = function (_baseEntity) {
 	    _inherits(BasicTorus, _baseEntity);
 	
-	    function BasicTorus(name, scene, initialPosition) {
+	    function BasicTorus(name, id, scene) {
 	        _classCallCheck(this, BasicTorus);
 	
-	        var _this = _possibleConstructorReturn(this, (BasicTorus.__proto__ || Object.getPrototypeOf(BasicTorus)).call(this, name));
+	        var _this = _possibleConstructorReturn(this, (BasicTorus.__proto__ || Object.getPrototypeOf(BasicTorus)).call(this, name, id));
 	
-	        _this.mesh = BasicTorus.getTorusMesh(scene, initialPosition);
-	        _this.mesh.userData.parent = _this;
+	        _this.loadMaterial(scene);
+	        // this.getModel(scene, initialPosition);
 	        return _this;
 	    }
 	
 	    _createClass(BasicTorus, [{
-	        key: 'update',
-	        value: function update() {
-	            this.mesh.rotateY(0.1);
+	        key: 'loadMaterial',
+	        value: function loadMaterial(scene, initialPosition) {
+	            // let mtlLoader = new THREE.MTLLoader();
+	            // mtlLoader.setPath('./Models/');
+	            // mtlLoader.load('Astronaut.mtl', materials => {
+	            //     materials.preload();
+	            //     this.getModel(scene, materials.materials.Astronaut_mat, initialPosition);
+	            // });
+	
+	            var volcano = void 0;
+	            var objLoader = new THREE.OBJLoader();
+	
+	            objLoader.setPath('./Models/volcano/');
+	            objLoader.load('Volcano.obj', function (object) {
+	                volcano = object;
+	                volcano.traverse(function (child) {
+	                    if (child instanceof THREE.Mesh) {
+	                        child.material.map = THREE.ImageUtils.loadTexture('./Models/volcano/Volcano.png');
+	                        child.material.map.needsUpdate = true;
+	                    }
+	                });
+	
+	                scene.add(volcano);
+	                volcano.position.set(10000, 10000, 10000);
+	                volcano.scale.x = 0.005;
+	                volcano.scale.y = 0.005;
+	                volcano.scale.z = 0.005;
+	
+	                var ambient = new THREE.AmbientLight(0x333333);
+	                scene.add(ambient);
+	
+	                var directionalLight = new THREE.DirectionalLight(0xffffff);
+	                directionalLight.position.set(1, 1, 0.5);
+	                scene.add(directionalLight);
+	            });
 	        }
 	    }, {
+	        key: 'getModel',
+	        value: function getModel(scene, material, initialPosition) {
+	            var _this2 = this;
+	
+	            var dracoLoader = new _DRACOLoader2.default('./ThirdParty/draco/DRACOLoader.js', { type: 'js' });
+	
+	            dracoLoader.load('./Models/Astronaut.drc', function (geometry) {
+	                geometry.computeVertexNormals();
+	
+	                // const material = new THREE.MeshPhongMaterial({ vertexColors: THREE.VertexColors });
+	                var shape = _this2.setupModel(new THREE.Mesh(geometry, material));
+	                // shape.castShadow = true;
+	                // shape.receiveShadow = true;
+	                shape.position.copy(initialPosition);
+	                scene.add(shape);
+	
+	                dracoLoader.releaseDecoderModule();
+	            });
+	        }
+	    }, {
+	        key: 'setupModel',
+	        value: function setupModel(mesh) {
+	            this.model = new THREE.Object3D();
+	            this.modelScene = new THREE.Object3D();
+	
+	            this.modelBoundingBox = new THREE.Box3();
+	            this.modelBoundingBox.setFromObject(mesh);
+	
+	            var objectSize = this.modelBoundingBox.getSize();
+	            var desiredHeight = 1.93;
+	            var scale = desiredHeight / objectSize.y;
+	
+	            this.model.renderOrder = 4;
+	            this.model.add(mesh);
+	
+	            var mtx = new THREE.Matrix4().makeScale(scale, scale, scale);
+	            mesh.castShadow = true;
+	            mesh.geometry.applyMatrix(mtx);
+	            this.modelBoundingBox.setFromObject(mesh);
+	
+	            this.modelScene.add(this.model);
+	            // this.S3DScene.add(this.modelScene);
+	        }
+	    }, {
+	        key: 'update',
+	        value: function update() {}
+	    }, {
 	        key: 'dispose',
-	        value: function dispose() {
-	            this.mesh.geometry.dispose();
-	            this.mesh.material.dispose();
-	            this.mesh.dispose();
-	        }
-	    }], [{
-	        key: 'getTorusMesh',
-	        value: function getTorusMesh(scene, initialPosition) {
-	            var torusProperties = {
-	                radius: 0.4,
-	                tube: 0.1,
-	                radialSegments: 20,
-	                tubularSegments: 30
-	            };
-	            var geometry = new THREE.TorusGeometry(torusProperties.radius, torusProperties.tube, torusProperties.radialSegments, torusProperties.tubularSegments);
-	            var material = new THREE.MeshPhongMaterial({ color: 0xFFA500 });
-	            var torus = new THREE.Mesh(geometry, material);
-	            torus.position.copy(initialPosition);
-	            scene.add(torus);
-	            return torus;
-	        }
+	        value: function dispose() {}
 	    }]);
 	
 	    return BasicTorus;
@@ -48205,12 +48278,1132 @@
 
 /***/ }),
 /* 7 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var _three = __webpack_require__(3);
+	
+	var THREE = _interopRequireWildcard(_three);
+	
+	function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+	
+	THREE.MTLLoader = function (manager) {
+	
+			this.manager = manager !== undefined ? manager : THREE.DefaultLoadingManager;
+	}; /**
+	    * Loads a Wavefront .mtl file specifying materials
+	    *
+	    * @author angelxuanchang
+	    */
+	
+	THREE.MTLLoader.prototype = {
+	
+			constructor: THREE.MTLLoader,
+	
+			/**
+	   * Loads and parses a MTL asset from a URL.
+	   *
+	   * @param {String} url - URL to the MTL file.
+	   * @param {Function} [onLoad] - Callback invoked with the loaded object.
+	   * @param {Function} [onProgress] - Callback for download progress.
+	   * @param {Function} [onError] - Callback for download errors.
+	   *
+	   * @see setPath setTexturePath
+	   *
+	   * @note In order for relative texture references to resolve correctly
+	   * you must call setPath and/or setTexturePath explicitly prior to load.
+	   */
+			load: function load(url, onLoad, onProgress, onError) {
+	
+					var scope = this;
+	
+					var loader = new THREE.FileLoader(this.manager);
+					loader.setPath(this.path);
+					loader.load(url, function (text) {
+	
+							onLoad(scope.parse(text));
+					}, onProgress, onError);
+			},
+	
+			/**
+	   * Set base path for resolving references.
+	   * If set this path will be prepended to each loaded and found reference.
+	   *
+	   * @see setTexturePath
+	   * @param {String} path
+	   *
+	   * @example
+	   *     mtlLoader.setPath( 'assets/obj/' );
+	   *     mtlLoader.load( 'my.mtl', ... );
+	   */
+			setPath: function setPath(path) {
+	
+					this.path = path;
+			},
+	
+			/**
+	   * Set base path for resolving texture references.
+	   * If set this path will be prepended found texture reference.
+	   * If not set and setPath is, it will be used as texture base path.
+	   *
+	   * @see setPath
+	   * @param {String} path
+	   *
+	   * @example
+	   *     mtlLoader.setPath( 'assets/obj/' );
+	   *     mtlLoader.setTexturePath( 'assets/textures/' );
+	   *     mtlLoader.load( 'my.mtl', ... );
+	   */
+			setTexturePath: function setTexturePath(path) {
+	
+					this.texturePath = path;
+			},
+	
+			setBaseUrl: function setBaseUrl(path) {
+	
+					console.warn('THREE.MTLLoader: .setBaseUrl() is deprecated. Use .setTexturePath( path ) for texture path or .setPath( path ) for general base path instead.');
+	
+					this.setTexturePath(path);
+			},
+	
+			setCrossOrigin: function setCrossOrigin(value) {
+	
+					this.crossOrigin = value;
+			},
+	
+			setMaterialOptions: function setMaterialOptions(value) {
+	
+					this.materialOptions = value;
+			},
+	
+			/**
+	   * Parses a MTL file.
+	   *
+	   * @param {String} text - Content of MTL file
+	   * @return {THREE.MTLLoader.MaterialCreator}
+	   *
+	   * @see setPath setTexturePath
+	   *
+	   * @note In order for relative texture references to resolve correctly
+	   * you must call setPath and/or setTexturePath explicitly prior to parse.
+	   */
+			parse: function parse(text) {
+	
+					var lines = text.split('\n');
+					var info = {};
+					var delimiter_pattern = /\s+/;
+					var materialsInfo = {};
+	
+					for (var i = 0; i < lines.length; i++) {
+	
+							var line = lines[i];
+							line = line.trim();
+	
+							if (line.length === 0 || line.charAt(0) === '#') {
+	
+									// Blank line or comment ignore
+									continue;
+							}
+	
+							var pos = line.indexOf(' ');
+	
+							var key = pos >= 0 ? line.substring(0, pos) : line;
+							key = key.toLowerCase();
+	
+							var value = pos >= 0 ? line.substring(pos + 1) : '';
+							value = value.trim();
+	
+							if (key === 'newmtl') {
+	
+									// New material
+	
+									info = { name: value };
+									materialsInfo[value] = info;
+							} else if (info) {
+	
+									if (key === 'ka' || key === 'kd' || key === 'ks') {
+	
+											var ss = value.split(delimiter_pattern, 3);
+											info[key] = [parseFloat(ss[0]), parseFloat(ss[1]), parseFloat(ss[2])];
+									} else {
+	
+											info[key] = value;
+									}
+							}
+					}
+	
+					var materialCreator = new THREE.MTLLoader.MaterialCreator(this.texturePath || this.path, this.materialOptions);
+					materialCreator.setCrossOrigin(this.crossOrigin);
+					materialCreator.setManager(this.manager);
+					materialCreator.setMaterials(materialsInfo);
+					return materialCreator;
+			}
+	
+	};
+	
+	/**
+	 * Create a new THREE-MTLLoader.MaterialCreator
+	 * @param baseUrl - Url relative to which textures are loaded
+	 * @param options - Set of options on how to construct the materials
+	 *                  side: Which side to apply the material
+	 *                        THREE.FrontSide (default), THREE.BackSide, THREE.DoubleSide
+	 *                  wrap: What type of wrapping to apply for textures
+	 *                        THREE.RepeatWrapping (default), THREE.ClampToEdgeWrapping, THREE.MirroredRepeatWrapping
+	 *                  normalizeRGB: RGBs need to be normalized to 0-1 from 0-255
+	 *                                Default: false, assumed to be already normalized
+	 *                  ignoreZeroRGBs: Ignore values of RGBs (Ka,Kd,Ks) that are all 0's
+	 *                                  Default: false
+	 * @constructor
+	 */
+	
+	THREE.MTLLoader.MaterialCreator = function (baseUrl, options) {
+	
+			this.baseUrl = baseUrl || '';
+			this.options = options;
+			this.materialsInfo = {};
+			this.materials = {};
+			this.materialsArray = [];
+			this.nameLookup = {};
+	
+			this.side = this.options && this.options.side ? this.options.side : THREE.FrontSide;
+			this.wrap = this.options && this.options.wrap ? this.options.wrap : THREE.RepeatWrapping;
+	};
+	
+	THREE.MTLLoader.MaterialCreator.prototype = {
+	
+			constructor: THREE.MTLLoader.MaterialCreator,
+	
+			crossOrigin: 'Anonymous',
+	
+			setCrossOrigin: function setCrossOrigin(value) {
+	
+					this.crossOrigin = value;
+			},
+	
+			setManager: function setManager(value) {
+	
+					this.manager = value;
+			},
+	
+			setMaterials: function setMaterials(materialsInfo) {
+	
+					this.materialsInfo = this.convert(materialsInfo);
+					this.materials = {};
+					this.materialsArray = [];
+					this.nameLookup = {};
+			},
+	
+			convert: function convert(materialsInfo) {
+	
+					if (!this.options) return materialsInfo;
+	
+					var converted = {};
+	
+					for (var mn in materialsInfo) {
+	
+							// Convert materials info into normalized form based on options
+	
+							var mat = materialsInfo[mn];
+	
+							var covmat = {};
+	
+							converted[mn] = covmat;
+	
+							for (var prop in mat) {
+	
+									var save = true;
+									var value = mat[prop];
+									var lprop = prop.toLowerCase();
+	
+									switch (lprop) {
+	
+											case 'kd':
+											case 'ka':
+											case 'ks':
+	
+													// Diffuse color (color under white light) using RGB values
+	
+													if (this.options && this.options.normalizeRGB) {
+	
+															value = [value[0] / 255, value[1] / 255, value[2] / 255];
+													}
+	
+													if (this.options && this.options.ignoreZeroRGBs) {
+	
+															if (value[0] === 0 && value[1] === 0 && value[2] === 0) {
+	
+																	// ignore
+	
+																	save = false;
+															}
+													}
+	
+													break;
+	
+											default:
+	
+													break;
+	
+									}
+	
+									if (save) {
+	
+											covmat[lprop] = value;
+									}
+							}
+					}
+	
+					return converted;
+			},
+	
+			preload: function preload() {
+	
+					for (var mn in this.materialsInfo) {
+	
+							this.create(mn);
+					}
+			},
+	
+			getIndex: function getIndex(materialName) {
+	
+					return this.nameLookup[materialName];
+			},
+	
+			getAsArray: function getAsArray() {
+	
+					var index = 0;
+	
+					for (var mn in this.materialsInfo) {
+	
+							this.materialsArray[index] = this.create(mn);
+							this.nameLookup[mn] = index;
+							index++;
+					}
+	
+					return this.materialsArray;
+			},
+	
+			create: function create(materialName) {
+	
+					if (this.materials[materialName] === undefined) {
+	
+							this.createMaterial_(materialName);
+					}
+	
+					return this.materials[materialName];
+			},
+	
+			createMaterial_: function createMaterial_(materialName) {
+	
+					// Create material
+	
+					var scope = this;
+					var mat = this.materialsInfo[materialName];
+					var params = {
+	
+							name: materialName,
+							side: this.side
+	
+					};
+	
+					function resolveURL(baseUrl, url) {
+	
+							if (typeof url !== 'string' || url === '') return '';
+	
+							// Absolute URL
+							if (/^https?:\/\//i.test(url)) return url;
+	
+							return baseUrl + url;
+					}
+	
+					function setMapForType(mapType, value) {
+	
+							if (params[mapType]) return; // Keep the first encountered texture
+	
+							var texParams = scope.getTextureParams(value, params);
+							var map = scope.loadTexture(resolveURL(scope.baseUrl, texParams.url));
+	
+							map.repeat.copy(texParams.scale);
+							map.offset.copy(texParams.offset);
+	
+							map.wrapS = scope.wrap;
+							map.wrapT = scope.wrap;
+	
+							params[mapType] = map;
+					}
+	
+					for (var prop in mat) {
+	
+							var value = mat[prop];
+							var n;
+	
+							if (value === '') continue;
+	
+							switch (prop.toLowerCase()) {
+	
+									// Ns is material specular exponent
+	
+									case 'kd':
+	
+											// Diffuse color (color under white light) using RGB values
+	
+											params.color = new THREE.Color().fromArray(value);
+	
+											break;
+	
+									case 'ks':
+	
+											// Specular color (color when light is reflected from shiny surface) using RGB values
+											params.specular = new THREE.Color().fromArray(value);
+	
+											break;
+	
+									case 'map_kd':
+	
+											// Diffuse texture map
+	
+											setMapForType("map", value);
+	
+											break;
+	
+									case 'map_ks':
+	
+											// Specular map
+	
+											setMapForType("specularMap", value);
+	
+											break;
+	
+									case 'norm':
+	
+											setMapForType("normalMap", value);
+	
+											break;
+	
+									case 'map_bump':
+									case 'bump':
+	
+											// Bump texture map
+	
+											setMapForType("bumpMap", value);
+	
+											break;
+	
+									case 'ns':
+	
+											// The specular exponent (defines the focus of the specular highlight)
+											// A high exponent results in a tight, concentrated highlight. Ns values normally range from 0 to 1000.
+	
+											params.shininess = parseFloat(value);
+	
+											break;
+	
+									case 'd':
+											n = parseFloat(value);
+	
+											if (n < 1) {
+	
+													params.opacity = n;
+													params.transparent = true;
+											}
+	
+											break;
+	
+									case 'tr':
+											n = parseFloat(value);
+	
+											if (n > 0) {
+	
+													params.opacity = 1 - n;
+													params.transparent = true;
+											}
+	
+											break;
+	
+									default:
+											break;
+	
+							}
+					}
+	
+					this.materials[materialName] = new THREE.MeshPhongMaterial(params);
+					return this.materials[materialName];
+			},
+	
+			getTextureParams: function getTextureParams(value, matParams) {
+	
+					var texParams = {
+	
+							scale: new THREE.Vector2(1, 1),
+							offset: new THREE.Vector2(0, 0)
+	
+					};
+	
+					var items = value.split(/\s+/);
+					var pos;
+	
+					pos = items.indexOf('-bm');
+	
+					if (pos >= 0) {
+	
+							matParams.bumpScale = parseFloat(items[pos + 1]);
+							items.splice(pos, 2);
+					}
+	
+					pos = items.indexOf('-s');
+	
+					if (pos >= 0) {
+	
+							texParams.scale.set(parseFloat(items[pos + 1]), parseFloat(items[pos + 2]));
+							items.splice(pos, 4); // we expect 3 parameters here!
+					}
+	
+					pos = items.indexOf('-o');
+	
+					if (pos >= 0) {
+	
+							texParams.offset.set(parseFloat(items[pos + 1]), parseFloat(items[pos + 2]));
+							items.splice(pos, 4); // we expect 3 parameters here!
+					}
+	
+					texParams.url = items.join(' ').trim();
+					return texParams;
+			},
+	
+			loadTexture: function loadTexture(url, mapping, onLoad, onProgress, onError) {
+	
+					var texture;
+					var loader = THREE.Loader.Handlers.get(url);
+					var manager = this.manager !== undefined ? this.manager : THREE.DefaultLoadingManager;
+	
+					if (loader === null) {
+	
+							loader = new THREE.TextureLoader(manager);
+					}
+	
+					if (loader.setCrossOrigin) loader.setCrossOrigin(this.crossOrigin);
+					texture = loader.load(url, onLoad, onProgress, onError);
+	
+					if (mapping !== undefined) texture.mapping = mapping;
+	
+					return texture;
+			}
+	
+	};
+
+/***/ }),
+/* 8 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var _three = __webpack_require__(3);
+	
+	var THREE = _interopRequireWildcard(_three);
+	
+	function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+	
+	THREE.OBJLoader = function () {
+	
+	                // o object_name | g group_name
+	                var object_pattern = /^[og]\s*(.+)?/;
+	                // mtllib file_reference
+	                var material_library_pattern = /^mtllib /;
+	                // usemtl material_name
+	                var material_use_pattern = /^usemtl /;
+	
+	                function ParserState() {
+	
+	                                var state = {
+	                                                objects: [],
+	                                                object: {},
+	
+	                                                vertices: [],
+	                                                normals: [],
+	                                                uvs: [],
+	
+	                                                materialLibraries: [],
+	
+	                                                startObject: function startObject(name, fromDeclaration) {
+	
+	                                                                // If the current object (initial from reset) is not from a g/o declaration in the parsed
+	                                                                // file. We need to use it for the first parsed g/o to keep things in sync.
+	                                                                if (this.object && this.object.fromDeclaration === false) {
+	
+	                                                                                this.object.name = name;
+	                                                                                this.object.fromDeclaration = fromDeclaration !== false;
+	                                                                                return;
+	                                                                }
+	
+	                                                                var previousMaterial = this.object && typeof this.object.currentMaterial === 'function' ? this.object.currentMaterial() : undefined;
+	
+	                                                                if (this.object && typeof this.object._finalize === 'function') {
+	
+	                                                                                this.object._finalize(true);
+	                                                                }
+	
+	                                                                this.object = {
+	                                                                                name: name || '',
+	                                                                                fromDeclaration: fromDeclaration !== false,
+	
+	                                                                                geometry: {
+	                                                                                                vertices: [],
+	                                                                                                normals: [],
+	                                                                                                uvs: []
+	                                                                                },
+	                                                                                materials: [],
+	                                                                                smooth: true,
+	
+	                                                                                startMaterial: function startMaterial(name, libraries) {
+	
+	                                                                                                var previous = this._finalize(false);
+	
+	                                                                                                // New usemtl declaration overwrites an inherited material, except if faces were declared
+	                                                                                                // after the material, then it must be preserved for proper MultiMaterial continuation.
+	                                                                                                if (previous && (previous.inherited || previous.groupCount <= 0)) {
+	
+	                                                                                                                this.materials.splice(previous.index, 1);
+	                                                                                                }
+	
+	                                                                                                var material = {
+	                                                                                                                index: this.materials.length,
+	                                                                                                                name: name || '',
+	                                                                                                                mtllib: Array.isArray(libraries) && libraries.length > 0 ? libraries[libraries.length - 1] : '',
+	                                                                                                                smooth: previous !== undefined ? previous.smooth : this.smooth,
+	                                                                                                                groupStart: previous !== undefined ? previous.groupEnd : 0,
+	                                                                                                                groupEnd: -1,
+	                                                                                                                groupCount: -1,
+	                                                                                                                inherited: false,
+	
+	                                                                                                                clone: function clone(index) {
+	                                                                                                                                var cloned = {
+	                                                                                                                                                index: typeof index === 'number' ? index : this.index,
+	                                                                                                                                                name: this.name,
+	                                                                                                                                                mtllib: this.mtllib,
+	                                                                                                                                                smooth: this.smooth,
+	                                                                                                                                                groupStart: 0,
+	                                                                                                                                                groupEnd: -1,
+	                                                                                                                                                groupCount: -1,
+	                                                                                                                                                inherited: false
+	                                                                                                                                };
+	                                                                                                                                cloned.clone = this.clone.bind(cloned);
+	                                                                                                                                return cloned;
+	                                                                                                                }
+	                                                                                                };
+	
+	                                                                                                this.materials.push(material);
+	
+	                                                                                                return material;
+	                                                                                },
+	
+	                                                                                currentMaterial: function currentMaterial() {
+	
+	                                                                                                if (this.materials.length > 0) {
+	                                                                                                                return this.materials[this.materials.length - 1];
+	                                                                                                }
+	
+	                                                                                                return undefined;
+	                                                                                },
+	
+	                                                                                _finalize: function _finalize(end) {
+	
+	                                                                                                var lastMultiMaterial = this.currentMaterial();
+	                                                                                                if (lastMultiMaterial && lastMultiMaterial.groupEnd === -1) {
+	
+	                                                                                                                lastMultiMaterial.groupEnd = this.geometry.vertices.length / 3;
+	                                                                                                                lastMultiMaterial.groupCount = lastMultiMaterial.groupEnd - lastMultiMaterial.groupStart;
+	                                                                                                                lastMultiMaterial.inherited = false;
+	                                                                                                }
+	
+	                                                                                                // Ignore objects tail materials if no face declarations followed them before a new o/g started.
+	                                                                                                if (end && this.materials.length > 1) {
+	
+	                                                                                                                for (var mi = this.materials.length - 1; mi >= 0; mi--) {
+	                                                                                                                                if (this.materials[mi].groupCount <= 0) {
+	                                                                                                                                                this.materials.splice(mi, 1);
+	                                                                                                                                }
+	                                                                                                                }
+	                                                                                                }
+	
+	                                                                                                // Guarantee at least one empty material, this makes the creation later more straight forward.
+	                                                                                                if (end && this.materials.length === 0) {
+	
+	                                                                                                                this.materials.push({
+	                                                                                                                                name: '',
+	                                                                                                                                smooth: this.smooth
+	                                                                                                                });
+	                                                                                                }
+	
+	                                                                                                return lastMultiMaterial;
+	                                                                                }
+	                                                                };
+	
+	                                                                // Inherit previous objects material.
+	                                                                // Spec tells us that a declared material must be set to all objects until a new material is declared.
+	                                                                // If a usemtl declaration is encountered while this new object is being parsed, it will
+	                                                                // overwrite the inherited material. Exception being that there was already face declarations
+	                                                                // to the inherited material, then it will be preserved for proper MultiMaterial continuation.
+	
+	                                                                if (previousMaterial && previousMaterial.name && typeof previousMaterial.clone === 'function') {
+	
+	                                                                                var declared = previousMaterial.clone(0);
+	                                                                                declared.inherited = true;
+	                                                                                this.object.materials.push(declared);
+	                                                                }
+	
+	                                                                this.objects.push(this.object);
+	                                                },
+	
+	                                                finalize: function finalize() {
+	
+	                                                                if (this.object && typeof this.object._finalize === 'function') {
+	
+	                                                                                this.object._finalize(true);
+	                                                                }
+	                                                },
+	
+	                                                parseVertexIndex: function parseVertexIndex(value, len) {
+	
+	                                                                var index = parseInt(value, 10);
+	                                                                return (index >= 0 ? index - 1 : index + len / 3) * 3;
+	                                                },
+	
+	                                                parseNormalIndex: function parseNormalIndex(value, len) {
+	
+	                                                                var index = parseInt(value, 10);
+	                                                                return (index >= 0 ? index - 1 : index + len / 3) * 3;
+	                                                },
+	
+	                                                parseUVIndex: function parseUVIndex(value, len) {
+	
+	                                                                var index = parseInt(value, 10);
+	                                                                return (index >= 0 ? index - 1 : index + len / 2) * 2;
+	                                                },
+	
+	                                                addVertex: function addVertex(a, b, c) {
+	
+	                                                                var src = this.vertices;
+	                                                                var dst = this.object.geometry.vertices;
+	
+	                                                                dst.push(src[a + 0], src[a + 1], src[a + 2]);
+	                                                                dst.push(src[b + 0], src[b + 1], src[b + 2]);
+	                                                                dst.push(src[c + 0], src[c + 1], src[c + 2]);
+	                                                },
+	
+	                                                addVertexLine: function addVertexLine(a) {
+	
+	                                                                var src = this.vertices;
+	                                                                var dst = this.object.geometry.vertices;
+	
+	                                                                dst.push(src[a + 0], src[a + 1], src[a + 2]);
+	                                                },
+	
+	                                                addNormal: function addNormal(a, b, c) {
+	
+	                                                                var src = this.normals;
+	                                                                var dst = this.object.geometry.normals;
+	
+	                                                                dst.push(src[a + 0], src[a + 1], src[a + 2]);
+	                                                                dst.push(src[b + 0], src[b + 1], src[b + 2]);
+	                                                                dst.push(src[c + 0], src[c + 1], src[c + 2]);
+	                                                },
+	
+	                                                addUV: function addUV(a, b, c) {
+	
+	                                                                var src = this.uvs;
+	                                                                var dst = this.object.geometry.uvs;
+	
+	                                                                dst.push(src[a + 0], src[a + 1]);
+	                                                                dst.push(src[b + 0], src[b + 1]);
+	                                                                dst.push(src[c + 0], src[c + 1]);
+	                                                },
+	
+	                                                addUVLine: function addUVLine(a) {
+	
+	                                                                var src = this.uvs;
+	                                                                var dst = this.object.geometry.uvs;
+	
+	                                                                dst.push(src[a + 0], src[a + 1]);
+	                                                },
+	
+	                                                addFace: function addFace(a, b, c, ua, ub, uc, na, nb, nc) {
+	
+	                                                                var vLen = this.vertices.length;
+	
+	                                                                var ia = this.parseVertexIndex(a, vLen);
+	                                                                var ib = this.parseVertexIndex(b, vLen);
+	                                                                var ic = this.parseVertexIndex(c, vLen);
+	
+	                                                                this.addVertex(ia, ib, ic);
+	
+	                                                                if (ua !== undefined) {
+	
+	                                                                                var uvLen = this.uvs.length;
+	
+	                                                                                ia = this.parseUVIndex(ua, uvLen);
+	                                                                                ib = this.parseUVIndex(ub, uvLen);
+	                                                                                ic = this.parseUVIndex(uc, uvLen);
+	
+	                                                                                this.addUV(ia, ib, ic);
+	                                                                }
+	
+	                                                                if (na !== undefined) {
+	
+	                                                                                // Normals are many times the same. If so, skip function call and parseInt.
+	                                                                                var nLen = this.normals.length;
+	                                                                                ia = this.parseNormalIndex(na, nLen);
+	
+	                                                                                ib = na === nb ? ia : this.parseNormalIndex(nb, nLen);
+	                                                                                ic = na === nc ? ia : this.parseNormalIndex(nc, nLen);
+	
+	                                                                                this.addNormal(ia, ib, ic);
+	                                                                }
+	                                                },
+	
+	                                                addLineGeometry: function addLineGeometry(vertices, uvs) {
+	
+	                                                                this.object.geometry.type = 'Line';
+	
+	                                                                var vLen = this.vertices.length;
+	                                                                var uvLen = this.uvs.length;
+	
+	                                                                for (var vi = 0, l = vertices.length; vi < l; vi++) {
+	
+	                                                                                this.addVertexLine(this.parseVertexIndex(vertices[vi], vLen));
+	                                                                }
+	
+	                                                                for (var uvi = 0, l = uvs.length; uvi < l; uvi++) {
+	
+	                                                                                this.addUVLine(this.parseUVIndex(uvs[uvi], uvLen));
+	                                                                }
+	                                                }
+	
+	                                };
+	
+	                                state.startObject('', false);
+	
+	                                return state;
+	                }
+	
+	                //
+	
+	                function OBJLoader(manager) {
+	
+	                                this.manager = manager !== undefined ? manager : THREE.DefaultLoadingManager;
+	
+	                                this.materials = null;
+	                };
+	
+	                OBJLoader.prototype = {
+	
+	                                constructor: OBJLoader,
+	
+	                                load: function load(url, onLoad, onProgress, onError) {
+	
+	                                                var scope = this;
+	
+	                                                var loader = new THREE.FileLoader(scope.manager);
+	                                                loader.setPath(this.path);
+	                                                loader.load(url, function (text) {
+	
+	                                                                onLoad(scope.parse(text));
+	                                                }, onProgress, onError);
+	                                },
+	
+	                                setPath: function setPath(value) {
+	
+	                                                this.path = value;
+	                                },
+	
+	                                setMaterials: function setMaterials(materials) {
+	
+	                                                this.materials = materials;
+	
+	                                                return this;
+	                                },
+	
+	                                parse: function parse(text) {
+	
+	                                                console.time('OBJLoader');
+	
+	                                                var state = new ParserState();
+	
+	                                                if (text.indexOf('\r\n') !== -1) {
+	
+	                                                                // This is faster than String.split with regex that splits on both
+	                                                                text = text.replace(/\r\n/g, '\n');
+	                                                }
+	
+	                                                if (text.indexOf('\\\n') !== -1) {
+	
+	                                                                // join lines separated by a line continuation character (\)
+	                                                                text = text.replace(/\\\n/g, '');
+	                                                }
+	
+	                                                var lines = text.split('\n');
+	                                                var line = '',
+	                                                    lineFirstChar = '';
+	                                                var lineLength = 0;
+	                                                var result = [];
+	
+	                                                // Faster to just trim left side of the line. Use if available.
+	                                                var trimLeft = typeof ''.trimLeft === 'function';
+	
+	                                                for (var i = 0, l = lines.length; i < l; i++) {
+	
+	                                                                line = lines[i];
+	
+	                                                                line = trimLeft ? line.trimLeft() : line.trim();
+	
+	                                                                lineLength = line.length;
+	
+	                                                                if (lineLength === 0) continue;
+	
+	                                                                lineFirstChar = line.charAt(0);
+	
+	                                                                // @todo invoke passed in handler if any
+	                                                                if (lineFirstChar === '#') continue;
+	
+	                                                                if (lineFirstChar === 'v') {
+	
+	                                                                                var data = line.split(/\s+/);
+	
+	                                                                                switch (data[0]) {
+	
+	                                                                                                case 'v':
+	                                                                                                                state.vertices.push(parseFloat(data[1]), parseFloat(data[2]), parseFloat(data[3]));
+	                                                                                                                break;
+	                                                                                                case 'vn':
+	                                                                                                                state.normals.push(parseFloat(data[1]), parseFloat(data[2]), parseFloat(data[3]));
+	                                                                                                                break;
+	                                                                                                case 'vt':
+	                                                                                                                state.uvs.push(parseFloat(data[1]), parseFloat(data[2]));
+	                                                                                                                break;
+	                                                                                }
+	                                                                } else if (lineFirstChar === 'f') {
+	
+	                                                                                var lineData = line.substr(1).trim();
+	                                                                                var vertexData = lineData.split(/\s+/);
+	                                                                                var faceVertices = [];
+	
+	                                                                                // Parse the face vertex data into an easy to work with format
+	
+	                                                                                for (var j = 0, jl = vertexData.length; j < jl; j++) {
+	
+	                                                                                                var vertex = vertexData[j];
+	
+	                                                                                                if (vertex.length > 0) {
+	
+	                                                                                                                var vertexParts = vertex.split('/');
+	                                                                                                                faceVertices.push(vertexParts);
+	                                                                                                }
+	                                                                                }
+	
+	                                                                                // Draw an edge between the first vertex and all subsequent vertices to form an n-gon
+	
+	                                                                                var v1 = faceVertices[0];
+	
+	                                                                                for (var j = 1, jl = faceVertices.length - 1; j < jl; j++) {
+	
+	                                                                                                var v2 = faceVertices[j];
+	                                                                                                var v3 = faceVertices[j + 1];
+	
+	                                                                                                state.addFace(v1[0], v2[0], v3[0], v1[1], v2[1], v3[1], v1[2], v2[2], v3[2]);
+	                                                                                }
+	                                                                } else if (lineFirstChar === 'l') {
+	
+	                                                                                var lineParts = line.substring(1).trim().split(" ");
+	                                                                                var lineVertices = [],
+	                                                                                    lineUVs = [];
+	
+	                                                                                if (line.indexOf("/") === -1) {
+	
+	                                                                                                lineVertices = lineParts;
+	                                                                                } else {
+	
+	                                                                                                for (var li = 0, llen = lineParts.length; li < llen; li++) {
+	
+	                                                                                                                var parts = lineParts[li].split("/");
+	
+	                                                                                                                if (parts[0] !== "") lineVertices.push(parts[0]);
+	                                                                                                                if (parts[1] !== "") lineUVs.push(parts[1]);
+	                                                                                                }
+	                                                                                }
+	                                                                                state.addLineGeometry(lineVertices, lineUVs);
+	                                                                } else if ((result = object_pattern.exec(line)) !== null) {
+	
+	                                                                                // o object_name
+	                                                                                // or
+	                                                                                // g group_name
+	
+	                                                                                // WORKAROUND: https://bugs.chromium.org/p/v8/issues/detail?id=2869
+	                                                                                // var name = result[ 0 ].substr( 1 ).trim();
+	                                                                                var name = (" " + result[0].substr(1).trim()).substr(1);
+	
+	                                                                                state.startObject(name);
+	                                                                } else if (material_use_pattern.test(line)) {
+	
+	                                                                                // material
+	
+	                                                                                state.object.startMaterial(line.substring(7).trim(), state.materialLibraries);
+	                                                                } else if (material_library_pattern.test(line)) {
+	
+	                                                                                // mtl file
+	
+	                                                                                state.materialLibraries.push(line.substring(7).trim());
+	                                                                } else if (lineFirstChar === 's') {
+	
+	                                                                                result = line.split(' ');
+	
+	                                                                                // smooth shading
+	
+	                                                                                // @todo Handle files that have varying smooth values for a set of faces inside one geometry,
+	                                                                                // but does not define a usemtl for each face set.
+	                                                                                // This should be detected and a dummy material created (later MultiMaterial and geometry groups).
+	                                                                                // This requires some care to not create extra material on each smooth value for "normal" obj files.
+	                                                                                // where explicit usemtl defines geometry groups.
+	                                                                                // Example asset: examples/models/obj/cerberus/Cerberus.obj
+	
+	                                                                                /*
+	                                                                                 * http://paulbourke.net/dataformats/obj/
+	                                                                                 * or
+	                                                                                 * http://www.cs.utah.edu/~boulos/cs3505/obj_spec.pdf
+	                                                                                 *
+	                                                                                 * From chapter "Grouping" Syntax explanation "s group_number":
+	                                                                                 * "group_number is the smoothing group number. To turn off smoothing groups, use a value of 0 or off.
+	                                                                                 * Polygonal elements use group numbers to put elements in different smoothing groups. For free-form
+	                                                                                 * surfaces, smoothing groups are either turned on or off; there is no difference between values greater
+	                                                                                 * than 0."
+	                                                                                 */
+	                                                                                if (result.length > 1) {
+	
+	                                                                                                var value = result[1].trim().toLowerCase();
+	                                                                                                state.object.smooth = value !== '0' && value !== 'off';
+	                                                                                } else {
+	
+	                                                                                                // ZBrush can produce "s" lines #11707
+	                                                                                                state.object.smooth = true;
+	                                                                                }
+	                                                                                var material = state.object.currentMaterial();
+	                                                                                if (material) material.smooth = state.object.smooth;
+	                                                                } else {
+	
+	                                                                                // Handle null terminated files without exception
+	                                                                                if (line === '\0') continue;
+	
+	                                                                                throw new Error("Unexpected line: '" + line + "'");
+	                                                                }
+	                                                }
+	
+	                                                state.finalize();
+	
+	                                                var container = new THREE.Group();
+	                                                container.materialLibraries = [].concat(state.materialLibraries);
+	
+	                                                for (var i = 0, l = state.objects.length; i < l; i++) {
+	
+	                                                                var object = state.objects[i];
+	                                                                var geometry = object.geometry;
+	                                                                var materials = object.materials;
+	                                                                var isLine = geometry.type === 'Line';
+	
+	                                                                // Skip o/g line declarations that did not follow with any faces
+	                                                                if (geometry.vertices.length === 0) continue;
+	
+	                                                                var buffergeometry = new THREE.BufferGeometry();
+	
+	                                                                buffergeometry.addAttribute('position', new THREE.BufferAttribute(new Float32Array(geometry.vertices), 3));
+	
+	                                                                if (geometry.normals.length > 0) {
+	
+	                                                                                buffergeometry.addAttribute('normal', new THREE.BufferAttribute(new Float32Array(geometry.normals), 3));
+	                                                                } else {
+	
+	                                                                                buffergeometry.computeVertexNormals();
+	                                                                }
+	
+	                                                                if (geometry.uvs.length > 0) {
+	
+	                                                                                buffergeometry.addAttribute('uv', new THREE.BufferAttribute(new Float32Array(geometry.uvs), 2));
+	                                                                }
+	
+	                                                                // Create materials
+	
+	                                                                var createdMaterials = [];
+	
+	                                                                for (var mi = 0, miLen = materials.length; mi < miLen; mi++) {
+	
+	                                                                                var sourceMaterial = materials[mi];
+	                                                                                var material = undefined;
+	
+	                                                                                if (this.materials !== null) {
+	
+	                                                                                                material = this.materials.create(sourceMaterial.name);
+	
+	                                                                                                // mtl etc. loaders probably can't create line materials correctly, copy properties to a line material.
+	                                                                                                if (isLine && material && !(material instanceof THREE.LineBasicMaterial)) {
+	
+	                                                                                                                var materialLine = new THREE.LineBasicMaterial();
+	                                                                                                                materialLine.copy(material);
+	                                                                                                                material = materialLine;
+	                                                                                                }
+	                                                                                }
+	
+	                                                                                if (!material) {
+	
+	                                                                                                material = !isLine ? new THREE.MeshPhongMaterial() : new THREE.LineBasicMaterial();
+	                                                                                                material.name = sourceMaterial.name;
+	                                                                                }
+	
+	                                                                                material.flatShading = sourceMaterial.smooth ? false : true;
+	
+	                                                                                createdMaterials.push(material);
+	                                                                }
+	
+	                                                                // Create mesh
+	
+	                                                                var mesh;
+	
+	                                                                if (createdMaterials.length > 1) {
+	
+	                                                                                for (var mi = 0, miLen = materials.length; mi < miLen; mi++) {
+	
+	                                                                                                var sourceMaterial = materials[mi];
+	                                                                                                buffergeometry.addGroup(sourceMaterial.groupStart, sourceMaterial.groupCount, mi);
+	                                                                                }
+	
+	                                                                                mesh = !isLine ? new THREE.Mesh(buffergeometry, createdMaterials) : new THREE.LineSegments(buffergeometry, createdMaterials);
+	                                                                } else {
+	
+	                                                                                mesh = !isLine ? new THREE.Mesh(buffergeometry, createdMaterials[0]) : new THREE.LineSegments(buffergeometry, createdMaterials[0]);
+	                                                                }
+	
+	                                                                mesh.name = object.name;
+	
+	                                                                container.add(mesh);
+	                                                }
+	
+	                                                console.timeEnd('OBJLoader');
+	
+	                                                return container;
+	                                }
+	
+	                };
+	
+	                return OBJLoader;
+	}(); /**
+	      * @author mrdoob / http://mrdoob.com/
+	      */
+
+/***/ }),
+/* 9 */
 /***/ (function(module, exports) {
 
 	"use strict";
 	
 	Object.defineProperty(exports, "__esModule", {
-	  value: true
+	    value: true
 	});
 	
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -48218,28 +49411,467 @@
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 	
 	var BaseEntity = function () {
-	  function BaseEntity(name) {
-	    _classCallCheck(this, BaseEntity);
+	    function BaseEntity(name, id) {
+	        _classCallCheck(this, BaseEntity);
 	
-	    this.name = name;
-	    this.id = Math.round(Math.random() * 100) + 1;
-	  }
+	        this.name = name;
+	        this.id = id;
+	    }
 	
-	  _createClass(BaseEntity, [{
-	    key: "update",
-	    value: function update() {}
-	  }, {
-	    key: "dispose",
-	    value: function dispose() {}
-	  }]);
+	    _createClass(BaseEntity, [{
+	        key: "update",
+	        value: function update() {}
+	    }, {
+	        key: "dispose",
+	        value: function dispose() {}
+	    }]);
 	
-	  return BaseEntity;
+	    return BaseEntity;
 	}();
 	
 	exports.default = BaseEntity;
 
 /***/ }),
-/* 8 */
+/* 10 */
+/***/ (function(module, exports) {
+
+	// Copyright 2016 The Draco Authors.
+	//
+	// Licensed under the Apache License, Version 2.0 (the "License");
+	// you may not use this file except in compliance with the License.
+	// You may obtain a copy of the License at
+	//
+	//      http://www.apache.org/licenses/LICENSE-2.0
+	//
+	// Unless required by applicable law or agreed to in writing, software
+	// distributed under the License is distributed on an "AS IS" BASIS,
+	// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	// See the License for the specific language governing permissions and
+	// limitations under the License.
+	//
+	'use strict';
+	
+	// |dracoPath| sets the path for the Draco decoder source files. The default
+	// path is "./". If |dracoDecoderType|.type is set to "js", then DRACOLoader
+	// will load the Draco JavaScript decoder.
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+	
+	function DRACOLoader(dracoPath, dracoDecoderType, manager) {
+	  this.timeLoaded = 0;
+	  this.manager = manager !== undefined ? manager : THREE.DefaultLoadingManager;
+	  this.materials = null;
+	  this.verbosity = 0;
+	  this.attributeOptions = {};
+	  if (dracoDecoderType !== undefined) {
+	    DRACOLoader.dracoDecoderType = dracoDecoderType;
+	  }
+	  this.drawMode = THREE.TrianglesDrawMode;
+	  this.dracoSrcPath = dracoPath !== undefined ? dracoPath : './';
+	  // If draco_decoder.js or wasm code is already loaded/included, then do
+	  // not dynamically load the decoder.
+	  if (typeof DracoDecoderModule === 'undefined') {
+	    DRACOLoader.loadDracoDecoder(this);
+	  }
+	  // User defined unique id for attributes.
+	  this.attributeUniqueIdMap = {};
+	  // Native Draco attribute type to Three.JS attribute type.
+	  this.nativeAttributeMap = {
+	    position: 'POSITION',
+	    normal: 'NORMAL',
+	    color: 'COLOR',
+	    uv: 'TEX_COORD'
+	  };
+	}
+	
+	DRACOLoader.dracoDecoderType = {};
+	
+	DRACOLoader.prototype = {
+	  constructor: DRACOLoader,
+	
+	  load: function load(url, onLoad, onProgress, onError) {
+	    var scope = this;
+	    var loader = new THREE.FileLoader(scope.manager);
+	    loader.setPath(this.path);
+	    loader.setResponseType('arraybuffer');
+	    if (this.crossOrigin !== undefined) {
+	      loader.crossOrigin = this.crossOrigin;
+	    }
+	    loader.load(url, function (blob) {
+	      scope.decodeDracoFile(blob, onLoad);
+	    }, onProgress, onError);
+	  },
+	
+	  setPath: function setPath(value) {
+	    this.path = value;
+	  },
+	
+	  setCrossOrigin: function setCrossOrigin(value) {
+	    this.crossOrigin = value;
+	  },
+	
+	  setVerbosity: function setVerbosity(level) {
+	    this.verbosity = level;
+	  },
+	
+	  /**
+	     *  Sets desired mode for generated geometry indices.
+	     *  Can be either:
+	     *      THREE.TrianglesDrawMode
+	     *      THREE.TriangleStripDrawMode
+	     */
+	  setDrawMode: function setDrawMode(drawMode) {
+	    this.drawMode = drawMode;
+	  },
+	
+	  /**
+	     * Skips dequantization for a specific attribute.
+	     * |attributeName| is the THREE.js name of the given attribute type.
+	     * The only currently supported |attributeName| is 'position', more may be
+	     * added in future.
+	     */
+	  setSkipDequantization: function setSkipDequantization(attributeName, skip) {
+	    var skipDequantization = true;
+	    if (typeof skip !== 'undefined') skipDequantization = skip;
+	    this.getAttributeOptions(attributeName).skipDequantization = skipDequantization;
+	  },
+	
+	  /**
+	     * |attributeUniqueIdMap| specifies attribute unique id for an attribute in
+	     * the geometry to be decoded. The name of the attribute must be one of the
+	     * supported attribute type in Three.JS, including:
+	     *     'position',
+	     *     'color',
+	     *     'normal',
+	     *     'uv',
+	     *     'uv2',
+	     *     'skinIndex',
+	     *     'skinWeight'.
+	     * The format is:
+	     *     attributeUniqueIdMap[attributeName] = attributeId
+	     */
+	  decodeDracoFile: function decodeDracoFile(rawBuffer, callback, attributeUniqueIdMap) {
+	    var scope = this;
+	    this.attributeUniqueIdMap = attributeUniqueIdMap !== undefined ? attributeUniqueIdMap : {};
+	    DRACOLoader.getDecoder(this, function (dracoDecoder) {
+	      scope.decodeDracoFileInternal(rawBuffer, dracoDecoder, callback);
+	    });
+	  },
+	
+	  decodeDracoFileInternal: function decodeDracoFileInternal(rawBuffer, dracoDecoder, callback) {
+	    /*
+	       * Here is how to use Draco Javascript decoder and get the geometry.
+	       */
+	    var buffer = new dracoDecoder.DecoderBuffer();
+	    buffer.Init(new Int8Array(rawBuffer), rawBuffer.byteLength);
+	    var decoder = new dracoDecoder.Decoder();
+	
+	    /*
+	       * Determine what type is this file: mesh or point cloud.
+	       */
+	    var geometryType = decoder.GetEncodedGeometryType(buffer);
+	    if (geometryType == dracoDecoder.TRIANGULAR_MESH) {
+	      if (this.verbosity > 0) {
+	        console.log('Loaded a mesh.');
+	      }
+	    } else if (geometryType == dracoDecoder.POINT_CLOUD) {
+	      if (this.verbosity > 0) {
+	        console.log('Loaded a point cloud.');
+	      }
+	    } else {
+	      var errorMsg = 'DRACOLoader: Unknown geometry type.';
+	      console.error(errorMsg);
+	      throw new Error(errorMsg);
+	    }
+	    callback(this.convertDracoGeometryTo3JS(dracoDecoder, decoder, geometryType, buffer));
+	  },
+	
+	  addAttributeToGeometry: function addAttributeToGeometry(dracoDecoder, decoder, dracoGeometry, attributeName, attribute, geometry, geometryBuffer) {
+	    if (attribute.ptr === 0) {
+	      var errorMsg = 'DRACOLoader: No attribute ' + attributeName;
+	      console.error(errorMsg);
+	      throw new Error(errorMsg);
+	    }
+	    var numComponents = attribute.num_components();
+	    var attributeData = new dracoDecoder.DracoFloat32Array();
+	    decoder.GetAttributeFloatForAllPoints(dracoGeometry, attribute, attributeData);
+	    var numPoints = dracoGeometry.num_points();
+	    var numValues = numPoints * numComponents;
+	    // Allocate space for attribute.
+	    geometryBuffer[attributeName] = new Float32Array(numValues);
+	    // Copy data from decoder.
+	    for (var i = 0; i < numValues; i++) {
+	      geometryBuffer[attributeName][i] = attributeData.GetValue(i);
+	    }
+	    // Add attribute to THREEJS geometry for rendering.
+	    geometry.addAttribute(attributeName, new THREE.Float32BufferAttribute(geometryBuffer[attributeName], numComponents));
+	    dracoDecoder.destroy(attributeData);
+	  },
+	
+	  convertDracoGeometryTo3JS: function convertDracoGeometryTo3JS(dracoDecoder, decoder, geometryType, buffer) {
+	    if (this.getAttributeOptions('position').skipDequantization === true) {
+	      decoder.SkipAttributeTransform(dracoDecoder.POSITION);
+	    }
+	    var dracoGeometry;
+	    var decodingStatus;
+	    var start_time = performance.now();
+	    if (geometryType === dracoDecoder.TRIANGULAR_MESH) {
+	      dracoGeometry = new dracoDecoder.Mesh();
+	      decodingStatus = decoder.DecodeBufferToMesh(buffer, dracoGeometry);
+	    } else {
+	      dracoGeometry = new dracoDecoder.PointCloud();
+	      decodingStatus = decoder.DecodeBufferToPointCloud(buffer, dracoGeometry);
+	    }
+	    if (!decodingStatus.ok() || dracoGeometry.ptr == 0) {
+	      var errorMsg = 'DRACOLoader: Decoding failed: ';
+	      errorMsg += decodingStatus.error_msg();
+	      console.error(errorMsg);
+	      dracoDecoder.destroy(decoder);
+	      dracoDecoder.destroy(dracoGeometry);
+	      throw new Error(errorMsg);
+	    }
+	
+	    var decode_end = performance.now();
+	    dracoDecoder.destroy(buffer);
+	    /*
+	         * Example on how to retrieve mesh and attributes.
+	         */
+	    var numFaces;
+	    if (geometryType == dracoDecoder.TRIANGULAR_MESH) {
+	      numFaces = dracoGeometry.num_faces();
+	      if (this.verbosity > 0) {
+	        console.log('Number of faces loaded: ' + numFaces.toString());
+	      }
+	    } else {
+	      numFaces = 0;
+	    }
+	
+	    var numPoints = dracoGeometry.num_points();
+	    var numAttributes = dracoGeometry.num_attributes();
+	    if (this.verbosity > 0) {
+	      console.log('Number of points loaded: ' + numPoints.toString());
+	      console.log('Number of attributes loaded: ' + numAttributes.toString());
+	    }
+	
+	    // Verify if there is position attribute.
+	    var posAttId = decoder.GetAttributeId(dracoGeometry, dracoDecoder.POSITION);
+	    if (posAttId == -1) {
+	      var errorMsg = 'DRACOLoader: No position attribute found.';
+	      console.error(errorMsg);
+	      dracoDecoder.destroy(decoder);
+	      dracoDecoder.destroy(dracoGeometry);
+	      throw new Error(errorMsg);
+	    }
+	    var posAttribute = decoder.GetAttribute(dracoGeometry, posAttId);
+	
+	    // Structure for converting to THREEJS geometry later.
+	    var geometryBuffer = {};
+	    // Import data to Three JS geometry.
+	    var geometry = new THREE.BufferGeometry();
+	
+	    // Add native Draco attribute type to geometry.
+	    for (var attributeName in this.nativeAttributeMap) {
+	      // The native attribute type is only used when no unique Id is
+	      // provided. For example, loading .drc files.
+	      if (this.attributeUniqueIdMap[attributeName] === undefined) {
+	        var attId = decoder.GetAttributeId(dracoGeometry, dracoDecoder[this.nativeAttributeMap[attributeName]]);
+	        if (attId !== -1) {
+	          if (this.verbosity > 0) {
+	            console.log('Loaded ' + attributeName + ' attribute.');
+	          }
+	          var attribute = decoder.GetAttribute(dracoGeometry, attId);
+	          this.addAttributeToGeometry(dracoDecoder, decoder, dracoGeometry, attributeName, attribute, geometry, geometryBuffer);
+	        }
+	      }
+	    }
+	
+	    // Add attributes of user specified unique id. E.g. GLTF Models.
+	    for (var attributeName in this.attributeUniqueIdMap) {
+	      var attributeId = this.attributeUniqueIdMap[attributeName];
+	      var attribute = decoder.GetAttributeByUniqueId(dracoGeometry, attributeId);
+	      this.addAttributeToGeometry(dracoDecoder, decoder, dracoGeometry, attributeName, attribute, geometry, geometryBuffer);
+	    }
+	
+	    // For mesh, we need to generate the faces.
+	    if (geometryType == dracoDecoder.TRIANGULAR_MESH) {
+	      if (this.drawMode === THREE.TriangleStripDrawMode) {
+	        var stripsArray = new dracoDecoder.DracoInt32Array();
+	        var numStrips = decoder.GetTriangleStripsFromMesh(dracoGeometry, stripsArray);
+	        geometryBuffer.indices = new Uint32Array(stripsArray.size());
+	        for (var i = 0; i < stripsArray.size(); ++i) {
+	          geometryBuffer.indices[i] = stripsArray.GetValue(i);
+	        }
+	        dracoDecoder.destroy(stripsArray);
+	      } else {
+	        var numIndices = numFaces * 3;
+	        geometryBuffer.indices = new Uint32Array(numIndices);
+	        var ia = new dracoDecoder.DracoInt32Array();
+	        for (var i = 0; i < numFaces; ++i) {
+	          decoder.GetFaceFromMesh(dracoGeometry, i, ia);
+	          var index = i * 3;
+	          geometryBuffer.indices[index] = ia.GetValue(0);
+	          geometryBuffer.indices[index + 1] = ia.GetValue(1);
+	          geometryBuffer.indices[index + 2] = ia.GetValue(2);
+	        }
+	        dracoDecoder.destroy(ia);
+	      }
+	    }
+	
+	    geometry.drawMode = this.drawMode;
+	    if (geometryType == dracoDecoder.TRIANGULAR_MESH) {
+	      geometry.setIndex(new (geometryBuffer.indices.length > 65535 ? THREE.Uint32BufferAttribute : THREE.Uint16BufferAttribute)(geometryBuffer.indices, 1));
+	    }
+	    var posTransform = new dracoDecoder.AttributeQuantizationTransform();
+	    if (posTransform.InitFromAttribute(posAttribute)) {
+	      // Quantized attribute. Store the quantization parameters into the
+	      // THREE.js attribute.
+	      geometry.attributes['position'].isQuantized = true;
+	      geometry.attributes['position'].maxRange = posTransform.range();
+	      geometry.attributes['position'].numQuantizationBits = posTransform.quantization_bits();
+	      geometry.attributes['position'].minValues = new Float32Array(3);
+	      for (var i = 0; i < 3; ++i) {
+	        geometry.attributes['position'].minValues[i] = posTransform.min_value(i);
+	      }
+	    }
+	    dracoDecoder.destroy(posTransform);
+	    dracoDecoder.destroy(decoder);
+	    dracoDecoder.destroy(dracoGeometry);
+	
+	    this.decode_time = decode_end - start_time;
+	    this.import_time = performance.now() - decode_end;
+	
+	    if (this.verbosity > 0) {
+	      console.log('Decode time: ' + this.decode_time);
+	      console.log('Import time: ' + this.import_time);
+	    }
+	    return geometry;
+	  },
+	
+	  isVersionSupported: function isVersionSupported(version, callback) {
+	    DRACOLoader.getDecoder(this, function (decoder) {
+	      callback(decoder.isVersionSupported(version));
+	    });
+	  },
+	
+	  getAttributeOptions: function getAttributeOptions(attributeName) {
+	    if (typeof this.attributeOptions[attributeName] === 'undefined') this.attributeOptions[attributeName] = {};
+	    return this.attributeOptions[attributeName];
+	  }
+	};
+	
+	// This function loads a JavaScript file and adds it to the page. "path"
+	// is the path to the JavaScript file. "onLoadFunc" is the function to be
+	// called when the JavaScript file has been loaded.
+	DRACOLoader.loadJavaScriptFile = function (path, onLoadFunc, dracoDecoder) {
+	  var previous_decoder_script = document.getElementById('decoder_script');
+	  if (previous_decoder_script !== null) {
+	    return;
+	  }
+	  var head = document.getElementsByTagName('head')[0];
+	  var element = document.createElement('script');
+	  element.id = 'decoder_script';
+	  element.type = 'text/javascript';
+	  element.src = path;
+	  if (onLoadFunc !== null) {
+	    element.onload = onLoadFunc(dracoDecoder);
+	  } else {
+	    element.onload = function (dracoDecoder) {
+	      DRACOLoader.timeLoaded = performance.now();
+	    };
+	  }
+	  head.appendChild(element);
+	};
+	
+	DRACOLoader.loadWebAssemblyDecoder = function (dracoDecoder) {
+	  DRACOLoader.dracoDecoderType['wasmBinaryFile'] = dracoDecoder.dracoSrcPath + 'draco_decoder.wasm';
+	  var xhr = new XMLHttpRequest();
+	  xhr.open('GET', dracoDecoder.dracoSrcPath + 'draco_decoder.wasm', true);
+	  xhr.responseType = 'arraybuffer';
+	  xhr.onload = function () {
+	    // draco_wasm_wrapper.js must be loaded before DracoDecoderModule is
+	    // created. The object passed into DracoDecoderModule() must contain a
+	    // property with the name of wasmBinary and the value must be an
+	    // ArrayBuffer containing the contents of the .wasm file.
+	    DRACOLoader.dracoDecoderType['wasmBinary'] = xhr.response;
+	    DRACOLoader.timeLoaded = performance.now();
+	  };
+	  xhr.send(null);
+	};
+	
+	// This function will test if the browser has support for WebAssembly. If
+	// it does it will download the WebAssembly Draco decoder, if not it will
+	// download the asmjs Draco decoder.
+	DRACOLoader.loadDracoDecoder = function (dracoDecoder) {
+	  if ((typeof WebAssembly === 'undefined' ? 'undefined' : _typeof(WebAssembly)) !== 'object' || DRACOLoader.dracoDecoderType.type === 'js') {
+	    // No WebAssembly support
+	    DRACOLoader.loadJavaScriptFile(
+	    //@TODO: CHANGED THIS
+	    dracoDecoder.dracoSrcPath + '/../' + 'draco_decoder.js', null, dracoDecoder);
+	  } else {
+	    DRACOLoader.loadJavaScriptFile(dracoDecoder.dracoSrcPath + 'draco_wasm_wrapper.js', function (dracoDecoder) {
+	      DRACOLoader.loadWebAssemblyDecoder(dracoDecoder);
+	    }, dracoDecoder);
+	  }
+	};
+	
+	/**
+	 * Creates and returns a singleton instance of the DracoDecoderModule.
+	 * The module loading is done asynchronously for WebAssembly. Initialized module
+	 * can be accessed through the callback function
+	 * |onDracoDecoderModuleLoadedCallback|.
+	 */
+	DRACOLoader.getDecoder = function () {
+	  var decoder;
+	  var decoderCreationCalled = false;
+	
+	  return function (dracoDecoder, onDracoDecoderModuleLoadedCallback) {
+	    if (typeof decoder !== 'undefined') {
+	      // Module already initialized.
+	      if (typeof onDracoDecoderModuleLoadedCallback !== 'undefined') {
+	        onDracoDecoderModuleLoadedCallback(decoder);
+	      }
+	    } else {
+	      if (typeof DracoDecoderModule === 'undefined') {
+	        // Wait until the Draco decoder is loaded before starting the error
+	        // timer.
+	        if (DRACOLoader.timeLoaded > 0) {
+	          var waitMs = performance.now() - DRACOLoader.timeLoaded;
+	
+	          // After loading the Draco JavaScript decoder file, there is still
+	          // some time before the DracoDecoderModule is defined. So start a
+	          // loop to check when the DracoDecoderModule gets defined. If the
+	          // time is hit throw an error.
+	          if (waitMs > 5000) {
+	            throw new Error('DRACOLoader: DracoDecoderModule not found.');
+	          }
+	        }
+	      } else {
+	        if (!decoderCreationCalled) {
+	          decoderCreationCalled = true;
+	          DRACOLoader.dracoDecoderType['onModuleLoaded'] = function (module) {
+	            decoder = module;
+	          };
+	          DracoDecoderModule(DRACOLoader.dracoDecoderType);
+	        }
+	      }
+	
+	      // Either the DracoDecoderModule has not been defined or the decoder
+	      // has not been created yet. Call getDecoder() again.
+	      setTimeout(function () {
+	        DRACOLoader.getDecoder(dracoDecoder, onDracoDecoderModuleLoadedCallback);
+	      }, 10);
+	    }
+	  };
+	}();
+	
+	exports.default = DRACOLoader;
+
+/***/ }),
+/* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -48289,8 +49921,9 @@
 	            this.renderer.setSize(window.innerWidth, window.innerHeight);
 	            this.renderer.autoClear = false;
 	            this.canvas = this.renderer.domElement;
-	            document.body.appendChild(this.canvas);
 	            this.arView = new _threeAr.ARView(this.vrDisplay, this.renderer);
+	
+	            document.body.appendChild(this.canvas);
 	        }
 	    }, {
 	        key: 'update',
@@ -48309,7 +49942,7 @@
 	exports.default = new Renderer();
 
 /***/ }),
-/* 9 */
+/* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';

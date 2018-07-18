@@ -15,9 +15,9 @@ A boilerplate for Bootstrapping AR experiences with Three.ar.js
 
 install dependencies
 
-`npm install`
+`yarn install`
 
 then run dev script 
 
-`npm run start`
+`yarn start`
 

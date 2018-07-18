@@ -5,15 +5,16 @@ import BasicTorus from '../Entities/BasicTorus';
 import renderer from './Renderer';
 import VRControls from '../Utils/VRControls';
 
-export default class Engine {
+class Engine {
     start() {
-        renderer.initRenderer().then((success) => {
-            if (success) {
-                this.buildCamera();
-                this.setupScene();
-                this.startUpdate();
-            }
-        });
+        renderer.initRenderer()
+            .then((success) => {
+                if (success) {
+                    this.buildCamera();
+                    this.setupScene();
+                    this.startUpdate();
+                }
+            });
     }
 
     buildCamera() {
@@ -24,24 +25,28 @@ export default class Engine {
             renderer.vrDisplay.depthNear,
             renderer.vrDisplay.depthFar
         );
+
         entityManager.mainCamera = camera;
         this.vrControls = new VRControls(camera);
     }
 
     setupScene() {
-        this.scene = new THREE.Scene();
-        entityManager.addEntity(new BasicTorus('torus', this.scene, new THREE.Vector3(0, 0, -1.5)));
         const light = new THREE.PointLight(0xffff00, 1, 100);
+
+        this.scene = new THREE.Scene();
+
+        entityManager.addEntity(new BasicTorus('torus', 1, this.scene, new THREE.Vector3(0, 0, -1.5)));
         light.position.set(5, 5, 5);
+
         this.scene.add(light);
         this.scene.add(entityManager.mainCamera);
     }
 
-    addCanvasEventHandlers() {
-        window.addEventListener('resize', this.onWindowResize, false);
+    static addCanvasEventHandlers() {
+        window.addEventListener('resize', Engine.onWindowResize, false);
     }
 
-    onWindowResize() {
+    static onWindowResize() {
         entityManager.mainCamera.aspect = window.innerWidth / window.innerHeight;
         entityManager.mainCamera.updateProjectionMatrix();
         renderer.renderer.setSize(window.innerWidth, window.innerHeight);
@@ -49,6 +54,7 @@ export default class Engine {
 
     startUpdate() {
         const currentInstance = this;
+
         this.update = () => {
             entityManager.update();
             entityManager.mainCamera.updateProjectionMatrix();
@@ -59,3 +65,4 @@ export default class Engine {
     }
 }
 
+export default Engine;
