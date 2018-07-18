@@ -94,9 +94,10 @@
     var camera;
     var scene;
     var renderer;
-    // var anchorManager;
+    var anchorManager;
 
     var vehicle;
+    var vehicles = [];
 
     var VEHICLE_SIZE = 0.4;
 
@@ -180,17 +181,16 @@
 
             var directionalLight = new THREE.DirectionalLight(0xffffff);
             directionalLight.position.set(1, 1, 0.5);
-            
+
             scene.add(directionalLight);
         });
 
+        // Initialize the anchor manager
+        anchorManager = new THREE.ARAnchorManager(vrDisplay);
 
         // Bind our event handlers
         window.addEventListener('resize', onWindowResize, false);
         canvas.addEventListener('touchstart', onClick, false);
-
-        // Initialize the anchor manager
-        // anchorManager = new THREE.ARAnchorManager(vrDisplay);
 
         // Kick off the render loop!
         update();
@@ -242,12 +242,15 @@
      */
     function onClick(e) {
         // Remove vehicle with more than one finger.
-        if (e.touches.length > 1) {
-            // scene.remove(vehicles[0]);
-            // anchorManager.remove(vehicles[0]);
-            // vehicles.splice(0, 1);
+        if (e.touches.length > 1 && vehicles.length > 0) {
+            scene.remove(vehicles[0]);
+            anchorManager.remove(vehicles[0]);
+            vehicles.splice(0, 1);
             return;
         }
+
+        // Create a new cube and place it where the hit test specifies.
+        var vehicleClone = vehicle.clone();
 
         // Inspect the event object and generate normalize screen coordinates
         // (between 0 and 1) for the screen position.
@@ -269,6 +272,10 @@
                 1,     // Easing value from 0 to 1; we want to move the vehicle directly to the hit position
                 true
             ); // Whether or not we also apply orientation
+
+            anchorManager.add(vehicleClone);
+            scene.add(vehicleClone);
+            cubes.push(vehicleClone);
 
         }
 
