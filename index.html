@@ -19,7 +19,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>three.ar.js - Spawn at Surface</title>
+    <title>Vehicle WebAR</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, user-scalable=no,
   minimum-scale=1.0, maximum-scale=1.0">
@@ -94,6 +94,7 @@
     var camera;
     var scene;
     var renderer;
+    // var anchorManager;
 
     var vehicle;
 
@@ -151,13 +152,6 @@
         // real world and virtual world in sync.
         vrControls = new THREE.VRControls(camera);
 
-        // Initialize the anchor manager
-        // anchorManager = new THREE.ARAnchorManager(vrDisplay);
-        // // Just show a message when anchors update.
-        // anchorManager.addEventListener("anchorsupdated", function(event) {
-        //     console.log(event.anchors.length + " Object3D-s updated their pose!");
-        // });
-
         // instantiate a loader
         var objLoader = new THREE.OBJLoader();
 
@@ -186,14 +180,17 @@
 
             var directionalLight = new THREE.DirectionalLight(0xffffff);
             directionalLight.position.set(1, 1, 0.5);
+            
             scene.add(directionalLight);
-            renderer.render(scene, camera);
         });
 
 
         // Bind our event handlers
         window.addEventListener('resize', onWindowResize, false);
         canvas.addEventListener('touchstart', onClick, false);
+
+        // Initialize the anchor manager
+        // anchorManager = new THREE.ARAnchorManager(vrDisplay);
 
         // Kick off the render loop!
         update();
@@ -266,13 +263,13 @@
         if (hits && hits.length) {
             var hit = hits[0];
 
-            THREE.ARUtils.placeObjectAtHit(vehicle,  // The object to place
+            THREE.ARUtils.placeObjectAtHit(
+                vehicle,  // The object to place
                 hit,   // The VRHit object to move the vehicle to
-                1,     // Easing value from 0 to 1; we want to move
-                // the vehicle directly to the hit position
-                true); // Whether or not we also apply orientation
+                1,     // Easing value from 0 to 1; we want to move the vehicle directly to the hit position
+                true
+            ); // Whether or not we also apply orientation
 
-            renderer.render(scene, camera);
         }
 
     }
