@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import {ARPerspectiveCamera} from 'three.ar.js';
+import {ARPerspectiveCamera, ARAnchorManager, ARDebug} from 'three.ar.js';
 import entityManager from './EntityManager';
 import BasicTorus from '../Entities/BasicTorus';
 import renderer from './Renderer';
@@ -7,6 +7,11 @@ import VRControls from '../Utils/VRControls';
 import {Color} from 'three';
 
 export default class Engine {
+
+    constructor() {
+
+    }
+
     start() {
         renderer.initRenderer().then((success) => {
             if (success) {
@@ -36,6 +41,7 @@ export default class Engine {
         light.position.set(5, 5, 5);
         this.scene.add(light);
         this.scene.add(entityManager.mainCamera);
+
     }
 
     addCanvasEventHandlers() {
@@ -62,6 +68,10 @@ export default class Engine {
             renderer.update(currentInstance.scene, entityManager.mainCamera, currentInstance.update);
         };
         this.update();
+    }
+
+    addAnchor() {
+
     }
 }
 

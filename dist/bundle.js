@@ -59,14 +59,21 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	var engine = new _Engine2.default();
-	engine.start();
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 	
-	document.getElementsByName('updateColor').forEach(function (button) {
-	    button.addEventListener('click', function (event) {
-	        engine.changeColor('torus', parseInt(event.target.value, 16));
+	var Main = function Main(engine) {
+	    _classCallCheck(this, Main);
+	
+	    this.engine = engine;
+	    this.engine.start();
+	    document.getElementsByName('updateColor').forEach(function (button) {
+	        button.addEventListener('click', function (event) {
+	            engine.changeColor('torus', parseInt(event.target.value, 16));
+	        });
 	    });
-	});
+	};
+	
+	new Main(new _Engine2.default());
 
 /***/ }),
 /* 2 */
@@ -173,6 +180,9 @@
 	            };
 	            this.update();
 	        }
+	    }, {
+	        key: 'addAnchor',
+	        value: function addAnchor() {}
 	    }]);
 	
 	    return Engine;
