@@ -51,6 +51,21 @@
             margin-top: 10px;
         }
 
+        .shape-button {
+            position: absolute;
+            z-index: 10;
+            width: 70px;
+            height: 70px;
+            border-radius: 50px;
+            border: 2px solid white;
+            margin: 3px;
+            right: 10%;
+            top: 40%;
+            margin-top: 10px;
+            background-color: purple;
+            color: white;
+        }
+
         .color-button:focus {
             width: 76px;
             height: 76px;
@@ -70,6 +85,12 @@
 </head>
 
 <body>
+
+
+<div>
+    <button id="updateShape" class="shape-button">Square</button>
+</div>
+
 
 <div class="color-block">
     <button name="updateColor" class="color-button" style="background-color: red;" value="0xFF0000"></button>

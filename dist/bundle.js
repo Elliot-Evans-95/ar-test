@@ -64,12 +64,15 @@
 	var Main = function Main(engine) {
 	    _classCallCheck(this, Main);
 	
-	    this.engine = engine;
-	    this.engine.start();
+	    engine.start();
 	    document.getElementsByName('updateColor').forEach(function (button) {
 	        button.addEventListener('click', function (event) {
-	            engine.changeColor('torus', parseInt(event.target.value, 16));
+	            engine.changeColor('shape', parseInt(event.target.value, 16));
 	        });
+	    });
+	
+	    document.getElementById('updateShape').addEventListener('click', function () {
+	        engine.changeObject();
 	    });
 	};
 	
@@ -101,11 +104,15 @@
 	
 	var _BasicTorus2 = _interopRequireDefault(_BasicTorus);
 	
-	var _Renderer = __webpack_require__(7);
+	var _BasicCubus = __webpack_require__(7);
+	
+	var _BasicCubus2 = _interopRequireDefault(_BasicCubus);
+	
+	var _Renderer = __webpack_require__(8);
 	
 	var _Renderer2 = _interopRequireDefault(_Renderer);
 	
-	var _VRControls = __webpack_require__(8);
+	var _VRControls = __webpack_require__(9);
 	
 	var _VRControls2 = _interopRequireDefault(_VRControls);
 	
@@ -144,7 +151,9 @@
 	        key: 'setupScene',
 	        value: function setupScene() {
 	            this.scene = new THREE.Scene();
-	            _EntityManager2.default.addEntity(new _BasicTorus2.default('torus', this.scene, new THREE.Vector3(0, 0, -1.5)));
+	
+	            _EntityManager2.default.addEntity(new _BasicTorus2.default('shape', this.scene, new THREE.Vector3(0, 0, -1.5)));
+	
 	            var light = new THREE.PointLight(0xffff00, 1, 100);
 	            light.position.set(5, 5, 5);
 	            this.scene.add(light);
@@ -167,6 +176,13 @@
 	        value: function changeColor(entityName, color) {
 	            var entity = _EntityManager2.default.findByName(entityName);
 	            entity.material.color = new _three.Color(color);
+	        }
+	    }, {
+	        key: 'changeObject',
+	        value: function changeObject() {
+	            var entity = _EntityManager2.default.findByName('shape');
+	            _EntityManager2.default.removeEntity(entity);
+	            _EntityManager2.default.addEntity(new _BasicCubus2.default('shape', this.scene, new THREE.Vector3(0, 0, -1.5)));
 	        }
 	    }, {
 	        key: 'startUpdate',
@@ -48189,6 +48205,10 @@
 	            var torus = new THREE.Mesh(geometry, material);
 	            torus.position.copy(initialPosition);
 	            scene.add(torus);
+	
+	            setTimeout(function () {
+	                scene.remove(torus);
+	            }, 2000);
 	            return torus;
 	        }
 	    }, {
@@ -48210,6 +48230,67 @@
 
 /***/ }),
 /* 7 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	var _three = __webpack_require__(3);
+	
+	var THREE = _interopRequireWildcard(_three);
+	
+	function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	var BasicTorus = function () {
+	    function BasicTorus(name, scene, initialPosition) {
+	        _classCallCheck(this, BasicTorus);
+	
+	        this.name = name;
+	        this.material = new THREE.MeshPhongMaterial({ color: 0xFFA500, shininess: 10 });
+	        this.mesh = this.getCubusMesh(this.material, scene, initialPosition);
+	    }
+	
+	    _createClass(BasicTorus, [{
+	        key: 'getCubusMesh',
+	        value: function getCubusMesh(material, scene, initialPosition) {
+	            var cubusProperties = {
+	                width: 0.5,
+	                height: 0.5,
+	                depth: 0.5
+	            };
+	            var geometry = new THREE.BoxGeometry(cubusProperties.width, cubusProperties.height, cubusProperties.depth);
+	            var torus = new THREE.Mesh(geometry, material);
+	            torus.position.copy(initialPosition);
+	            scene.add(torus);
+	
+	            return torus;
+	        }
+	    }, {
+	        key: 'update',
+	        value: function update() {}
+	    }, {
+	        key: 'dispose',
+	        value: function dispose() {
+	            this.mesh.geometry.dispose();
+	            this.mesh.material.dispose();
+	            this.mesh.dispose();
+	        }
+	    }]);
+	
+	    return BasicTorus;
+	}();
+	
+	exports.default = BasicTorus;
+
+/***/ }),
+/* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -48279,7 +48360,7 @@
 	exports.default = new Renderer();
 
 /***/ }),
-/* 8 */
+/* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';

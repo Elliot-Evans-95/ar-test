@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import {ARPerspectiveCamera, ARAnchorManager, ARDebug} from 'three.ar.js';
 import entityManager from './EntityManager';
 import BasicTorus from '../Entities/BasicTorus';
+import BasicCubus from '../Entities/BasicCubus';
 import renderer from './Renderer';
 import VRControls from '../Utils/VRControls';
 import {Color} from 'three';
@@ -36,7 +37,9 @@ export default class Engine {
 
     setupScene() {
         this.scene = new THREE.Scene();
-        entityManager.addEntity(new BasicTorus('torus', this.scene, new THREE.Vector3(0, 0, -1.5)));
+
+        entityManager.addEntity(new BasicTorus('shape', this.scene, new THREE.Vector3(0, 0, -1.5)));
+
         const light = new THREE.PointLight(0xffff00, 1, 100);
         light.position.set(5, 5, 5);
         this.scene.add(light);
@@ -57,6 +60,11 @@ export default class Engine {
     changeColor(entityName, color) {
         const entity = entityManager.findByName(entityName);
         entity.material.color = new Color(color);
+    }
+
+    changeObject() {
+        entityManager.removeEntity(new BasicTorus('shape', this.scene, new THREE.Vector3(0, 0, -1.5)));
+        entityManager.addEntity(new BasicCubus('shape', this.scene, new THREE.Vector3(0, 0, -1.5)));
     }
 
     startUpdate() {
