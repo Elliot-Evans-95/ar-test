@@ -1,21 +1,3 @@
-<!-- Spwarn object at position ->
-
-<!--
-/*
- * Copyright 2017 Google Inc. All Rights Reserved.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
--->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -75,8 +57,7 @@
 <div id="info">
     <span class="title">Tap to spawn objects on surfaces.</span><br/>
     <span class="links">
-        <a href="https://github.com/google-ar/three.ar.js">three.ar.js</a> -
-        <a href="https://developers.google.com/ar/develop/web/getting-started#examples">examples</a>
+        <a id="grey">grey color</a>
     </span>
 </div>
 <script src="ThirdParty/three.js/three.min.js"></script>
@@ -85,7 +66,6 @@
 <script src="ThirdParty/three.js/MTLLoader.js"></script>
 <script src="ThirdParty/three.ar.js/three.ar.min.js"></script>
 <script>
-
     var vrDisplay;
     var vrControls;
     var arView;
@@ -235,7 +215,6 @@
         renderer.setSize(window.innerWidth, window.innerHeight);
     }
 
-
     /**
      * When clicking on the screen, fire a ray from where the user clicked
      * on the screen and if a hit is found, place a vehicle there.
@@ -276,10 +255,23 @@
             anchorManager.add(vehicleClone);
             scene.add(vehicleClone);
             cubes.push(vehicleClone);
-
         }
 
     }
+
+    document.getElementById('grey').addEventListener('click', function () {
+        onSkinChange('./Models/eclipse/eclipse-diffuse-gray.png');
+    });
+
+    function onSkinChange(link) {
+        vehicle.traverse(function (child) {
+            if (child instanceof THREE.Mesh) {
+                child.material.map = THREE.ImageUtils.loadTexture(link);
+                child.material.map.needsUpdate = true;
+            }
+        });
+    }
+
 </script>
 </body>
 </html>
