@@ -63,6 +63,7 @@ export default class Engine {
     }
 
     changeObject() {
+        // PLEASE, PLEASE, PLEASE DELET THIS!!!!!
         entityManager.removeEntity(new BasicTorus('shape', this.scene, new THREE.Vector3(0, 0, -1.5)));
         entityManager.addEntity(new BasicCubus('shape', this.scene, new THREE.Vector3(0, 0, -1.5)));
     }
