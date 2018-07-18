@@ -4,7 +4,7 @@ class BasicTorus {
 
     constructor(name, scene, initialPosition) {
         this.name = name;
-        this.material = new THREE.MeshPhongMaterial({ color: 0xFFA500 });
+        this.material = new THREE.MeshPhongMaterial({ color: 0xFFA500, shininess: 10 });
         this.mesh = this.getTorusMesh(this.material, scene, initialPosition);
     }
 
@@ -13,7 +13,7 @@ class BasicTorus {
             radius: 0.4,
             tube: 0.1,
             radialSegments: 20,
-            tubularSegments: 30,
+            tubularSegments: 30
         };
         const geometry = new THREE.TorusGeometry(torusProperties.radius, torusProperties.tube, torusProperties.radialSegments, torusProperties.tubularSegments);
         let torus = new THREE.Mesh(geometry, material);

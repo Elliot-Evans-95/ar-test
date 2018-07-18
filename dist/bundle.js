@@ -64,7 +64,7 @@
 	
 	document.getElementsByName('updateColor').forEach(function (button) {
 	    button.addEventListener('click', function (event) {
-	        engine.changeColor('torus', event.target.value);
+	        engine.changeColor('torus', parseInt(event.target.value, 16));
 	    });
 	});
 
@@ -159,7 +159,7 @@
 	        key: 'changeColor',
 	        value: function changeColor(entityName, color) {
 	            var entity = _EntityManager2.default.findByName(entityName);
-	            entity.material.color = new _three.Color(0xff0000);
+	            entity.material.color = new _three.Color(color);
 	        }
 	    }, {
 	        key: 'startUpdate',
@@ -48162,7 +48162,7 @@
 	        _classCallCheck(this, BasicTorus);
 	
 	        this.name = name;
-	        this.material = new THREE.MeshPhongMaterial({ color: 0xFFA500 });
+	        this.material = new THREE.MeshPhongMaterial({ color: 0xFFA500, shininess: 10 });
 	        this.mesh = this.getTorusMesh(this.material, scene, initialPosition);
 	    }
 	
