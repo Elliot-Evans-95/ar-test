@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import {ARUtils, ARView, ARDebug} from 'three.ar.js';
+import {ARUtils, ARView} from 'three.ar.js';
 
 class Renderer {
     constructor() {
@@ -7,15 +7,16 @@ class Renderer {
     }
 
     initRenderer() {
-        return ARUtils.getARDisplay().then((display) => {
-            if (display) {
-                this.vrDisplay = display;
-                this.setupRenderer();
-                return true;
-            }
-            ARUtils.displayUnsupportedMessage();
-            return false;
-        });
+        return ARUtils.getARDisplay()
+            .then((display) => {
+                if (display) {
+                    this.vrDisplay = display;
+                    this.setupRenderer();
+                    return true;
+                }
+                ARUtils.displayUnsupportedMessage();
+                return false;
+            });
     }
 
     setupRenderer() {
@@ -23,8 +24,9 @@ class Renderer {
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         this.renderer.autoClear = false;
         this.canvas = this.renderer.domElement;
-        document.body.appendChild(this.canvas);
         this.arView = new ARView(this.vrDisplay, this.renderer);
+
+        document.body.appendChild(this.canvas);
     }
 
     update(scene, camera, updateCallback) {

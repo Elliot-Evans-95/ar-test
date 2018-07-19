@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <title>:D</title>
+    <title>Vehicle WebAR</title>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <meta name="viewport" content="width=device-width, user-scalable=no,
+  minimum-scale=1.0, maximum-scale=1.0">
     <style>
         body {
             font-family: monospace;
@@ -21,6 +21,23 @@
             outline: none;
         }
 
+        #info {
+            position: absolute;
+            left: 50%;
+            bottom: 0;
+            transform: translate(-50%, 0);
+            margin: 1em;
+            z-index: 10;
+            display: block;
+            width: 100%;
+            line-height: 2em;
+            text-align: center;
+        }
+
+        #info * {
+            color: #fff;
+        }
+
         .title {
             background-color: rgba(40, 40, 40, 0.4);
             padding: 0.4em 0.6em;
@@ -31,6 +48,10 @@
             background-color: rgba(40, 40, 40, 0.6);
             padding: 0.4em 0.6em;
             border-radius: 0.1em;
+        }
+
+        .links a {
+            padding: 0 0.5em;
         }
 
         canvas {
@@ -83,27 +104,238 @@
     </style>
 </head>
 
-<body>
-
-
-<div>
-    <button id="updateShape" class="shape-button">Square</button>
-</div>
-
-
-<div class="color-block">
-    <button name="updateColor" class="color-button" style="background-color: red;" value="0xFF0000"></button>
-
-    <button name="updateColor" class="color-button" style="background-color: black;" value="0x0000FF"></button>
-
-    <button name="updateColor" class="color-button" style="background-color: green;" value="0x00FF00"></button>
-
-    <button name="updateColor" class="color-button" style="background-color: yellow;" value="0xFFFF00"></button>
-
-    <button name="updateColor" class="color-button" style="background-color: brown;" value="0x8000FF"></button>
-</div>
-<script src="./dist/bundle.js"></script>
-
 </body>
+<body>
+<div id="info">
+    <span class="title">Tap to spawn objects on surfaces.</span><br/>
+    <span class="links">
+        <a id="grey">grey color</a>
+        <a id="volcano">change model</a>
+    </span>
+</div>
+<script src="ThirdParty/three.js/three.min.js"></script>
+<script src="ThirdParty/three.js/VRControls.js"></script>
+<script src="ThirdParty/three.js/OBJLoader.js"></script>
+<script src="ThirdParty/three.js/MTLLoader.js"></script>
+<script src="ThirdParty/three.ar.js/three.ar.min.js"></script>
+<script>
+    var vrDisplay;
+    var vrControls;
+    var arView;
 
+    var canvas;
+    var camera;
+    var scene;
+    var renderer;
+    var anchorManager;
+
+    var vehicle;
+    var vehicles = [];
+
+    var VEHICLE_SIZE = 0.4;
+
+    /**
+     * Use the `getARDisplay()` utility to leverage the WebVR API
+     * to see if there are any AR-capable WebVR VRDisplays. Returns
+     * a valid display if found. Otherwise, display the unsupported
+     * browser message.
+     */
+    THREE.ARUtils.getARDisplay().then(function (display) {
+        if (display) {
+            vrDisplay = display;
+            init();
+        } else {
+            THREE.ARUtils.displayUnsupportedMessage();
+        }
+    });
+
+    function init() {
+        // Turn on the debugging panel
+        var arDebug = new THREE.ARDebug(vrDisplay);
+        document.body.appendChild(arDebug.getElement());
+
+        // Setup the three.js rendering environment
+        renderer = new THREE.WebGLRenderer({ alpha: true });
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.autoClear = false;
+        canvas = renderer.domElement;
+        document.body.appendChild(canvas);
+        scene = new THREE.Scene();
+
+        // Creating the ARView, which is the object that handles
+        // the rendering of the camera stream behind the three.js
+        // scene
+        arView = new THREE.ARView(vrDisplay, renderer);
+
+        // The ARPerspectiveCamera is very similar to THREE.PerspectiveCamera,
+        // except when using an AR-capable browser, the camera uses
+        // the projection matrix provided from the device, so that the
+        // perspective camera's depth planes and field of view matches
+        // the physical camera on the device.
+        camera = new THREE.ARPerspectiveCamera(
+            vrDisplay,
+            60,
+            window.innerWidth / window.innerHeight,
+            vrDisplay.depthNear,
+            vrDisplay.depthFar
+        );
+
+        // VRControls is a utility from three.js that applies the device's
+        // orientation/position to the perspective camera, keeping our
+        // real world and virtual world in sync.
+        vrControls = new THREE.VRControls(camera);
+
+        // instantiate a loader
+        loadVehicle('./Models/eclipse/', 'eclipse.obj', './Models/eclipse/eclipse-diffuse-blue.png');
+
+        // Initialize the anchor manager
+        anchorManager = new THREE.ARAnchorManager(vrDisplay);
+
+        // Bind our event handlers
+        window.addEventListener('resize', onWindowResize, false);
+        canvas.addEventListener('touchstart', onClick, false);
+
+        // Kick off the render loop!
+        update();
+    }
+
+    /**
+     * The render loop, called once per frame. Handles updating
+     * our scene and rendering.
+     */
+    function update() {
+        // Clears color from the frame before rendering the camera (arView) or scene.
+        renderer.clearColor();
+
+        // Render the device's camera stream on screen first of all.
+        // It allows to get the right pose synchronized with the right frame.
+        arView.render();
+
+        // Update our camera projection matrix in the event that
+        // the near or far planes have updated
+        camera.updateProjectionMatrix();
+
+        // Update our perspective camera's positioning
+        vrControls.update();
+
+        // Render our three.js virtual scene
+        renderer.clearDepth();
+        renderer.render(scene, camera);
+
+        // Kick off the requestAnimationFrame to call this function
+        // when a new VRDisplay frame is rendered
+        vrDisplay.requestAnimationFrame(update);
+    }
+
+    /**
+     * On window resize, update the perspective camera's aspect ratio,
+     * and call `updateProjectionMatrix` so that we can get the latest
+     * projection matrix provided from the device
+     */
+    function onWindowResize() {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    /**
+     * When clicking on the screen, fire a ray from where the user clicked
+     * on the screen and if a hit is found, place a vehicle there.
+     */
+    function onClick(e) {
+        // Remove vehicle with more than one finger.
+        if (e.touches.length > 1 && vehicles.length > 0) {
+            scene.remove(vehicles[0]);
+            anchorManager.remove(vehicles[0]);
+            vehicles.splice(0, 1);
+            return;
+        }
+
+        // Create a new cube and place it where the hit test specifies.
+        var vehicleClone = vehicle.clone();
+
+        // Inspect the event object and generate normalize screen coordinates
+        // (between 0 and 1) for the screen position.
+        var x = e.touches[0].pageX / window.innerWidth;
+        var y = e.touches[0].pageY / window.innerHeight;
+
+        // Send a ray from the point of click to the real world surface
+        // and attempt to find a hit. `hitTest` returns an array of potential
+        // hits.
+        var hits = vrDisplay.hitTest(x, y);
+
+        // If a hit is found, just use the first one
+        if (hits && hits.length) {
+            var hit = hits[0];
+
+            THREE.ARUtils.placeObjectAtHit(
+                vehicle,  // The object to place
+                hit,   // The VRHit object to move the vehicle to
+                1,     // Easing value from 0 to 1; we want to move the vehicle directly to the hit position
+                true
+            ); // Whether or not we also apply orientation
+
+            anchorManager.add(vehicleClone);
+            scene.add(vehicleClone);
+            vehicles.push(vehicleClone);
+        }
+
+    }
+
+    // UI EVENTS
+    document.getElementById('grey').addEventListener('click', function () {
+        onSkinChange('./Models/eclipse/eclipse-diffuse-gray.png');
+    });
+
+    document.getElementById('volcano').addEventListener('click', function (e) {
+        scene.remove(vehicle);
+        loadVehicle('./Models/volcano/', 'Volcano.obj', './Models/Volcano/Volcano.png');
+        // onClick(e);
+    });
+
+    function onSkinChange(link) {
+        vehicle.traverse(function (child) {
+            if (child instanceof THREE.Mesh) {
+                child.material.map = THREE.ImageUtils.loadTexture(link);
+                child.material.map.needsUpdate = true;
+            }
+        });
+    }
+
+    function loadVehicle(vehiclePath, vehicleModel, vehicleTexture) {
+        var objLoader = new THREE.OBJLoader();
+
+        objLoader.setPath(vehiclePath);
+        objLoader.load(vehicleModel, function (object) {
+            vehicle = object;
+
+            vehicle.traverse(function (child) {
+                if (child instanceof THREE.Mesh) {
+                    child.material.map = THREE.ImageUtils.loadTexture(vehicleTexture);
+                    child.material.map.needsUpdate = true;
+                }
+            });
+
+            // geometry.applyMatrix( new THREE.Matrix4().setTranslation( 0, VEHICLE_SIZE / 2, 0 ) );
+            vehicle.translate(0, VEHICLE_SIZE / 2, 0);
+
+            scene.add(vehicle);
+            vehicle.position.set(10000, 10000, 10000);
+            vehicle.scale.x = 0.005;
+            vehicle.scale.y = 0.005;
+            vehicle.scale.z = 0.005;
+
+            var ambient = new THREE.AmbientLight(0x333333);
+            scene.add(ambient);
+
+            var directionalLight = new THREE.DirectionalLight(0xffffff);
+            directionalLight.position.set(1, 1, 0.5);
+
+            scene.add(directionalLight);
+        });
+    }
+
+</script>
+</body>
 </html>
