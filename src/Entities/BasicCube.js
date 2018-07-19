@@ -6,8 +6,6 @@ class BasicTorus {
         this.name = name;
         this.material = new THREE.MeshPhongMaterial({ color: 0xFFA500, shininess: 10 });
         this.mesh = this.getCubusMesh(this.material, scene, initialPosition);
-
-
     }
 
     getCubusMesh(material, scene, initialPosition) {
@@ -21,12 +19,11 @@ class BasicTorus {
         torus.position.copy(initialPosition);
         scene.add(torus);
 
-
         return torus;
     }
 
     update() {
-
+        this.mesh.rotateX(0.1);
     }
 
     dispose() {

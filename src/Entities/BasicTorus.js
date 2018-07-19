@@ -19,11 +19,12 @@ class BasicTorus {
         let torus = new THREE.Mesh(geometry, material);
         torus.position.copy(initialPosition);
         scene.add(torus);
+
         return torus;
     }
 
     update() {
-
+        this.mesh.rotateY(0.1);
     }
 
     dispose() {

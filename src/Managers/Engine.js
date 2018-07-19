@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import {ARPerspectiveCamera, ARAnchorManager, ARDebug} from 'three.ar.js';
 import entityManager from './EntityManager';
 import BasicTorus from '../Entities/BasicTorus';
-import BasicCubus from '../Entities/BasicCubus';
+import BasicCubus from '../Entities/BasicCube';
 import renderer from './Renderer';
 import VRControls from '../Utils/VRControls';
 import {Color} from 'three';
@@ -10,7 +10,8 @@ import {Color} from 'three';
 export default class Engine {
 
     constructor() {
-
+        this.shape;
+        this.scene;
     }
 
     start() {
@@ -38,8 +39,6 @@ export default class Engine {
     setupScene() {
         this.scene = new THREE.Scene();
 
-        entityManager.addEntity(new BasicTorus('shape', this.scene, new THREE.Vector3(0, 0, -1.5)));
-
         const light = new THREE.PointLight(0xffff00, 1, 100);
         light.position.set(5, 5, 5);
         this.scene.add(light);
@@ -62,10 +61,18 @@ export default class Engine {
         entity.material.color = new Color(color);
     }
 
-    changeObject() {
-        // PLEASE, PLEASE, PLEASE DELET THIS!!!!!
-        entityManager.removeEntity(new BasicTorus('shape', this.scene, new THREE.Vector3(0, 0, -1.5)));
-        entityManager.addEntity(new BasicCubus('shape', this.scene, new THREE.Vector3(0, 0, -1.5)));
+    changeObject(type) {
+        if (type === "cube") {
+            entityManager.addEntity(new BasicCubus('cube', this.scene, new THREE.Vector3(0, 0, -2.5)));
+        }
+        else if (type === "torus") {
+            this.shape = new BasicTorus('torus', this.scene, new THREE.Vector3(0, 0, -2.5));
+            entityManager.addEntity(this.shape);
+        }
+    }
+
+    removeObject() {
+        // const entity = entityManager.findByName('torus');
     }
 
     startUpdate() {

@@ -67,12 +67,30 @@
 	    engine.start();
 	    document.getElementsByName('updateColor').forEach(function (button) {
 	        button.addEventListener('click', function (event) {
-	            engine.changeColor('shape', parseInt(event.target.value, 16));
+	            engine.changeColor('torus', parseInt(event.target.value, 16));
 	        });
 	    });
 	
-	    document.getElementById('updateShape').addEventListener('click', function () {
-	        engine.changeObject();
+	    document.getElementsByName('updateColor').forEach(function (button) {
+	        button.addEventListener('click', function (event) {
+	            engine.changeColor('cube', parseInt(event.target.value, 16));
+	        });
+	    });
+	
+	    document.getElementsByName('updateShape').forEach(function (button) {
+	        button.addEventListener('click', function (event) {
+	            engine.changeObject(event.target.value);
+	        });
+	    });
+	
+	    document.getElementsByName('scaleShape').forEach(function (button) {
+	        button.addEventListener('click', function (event) {
+	            engine.changeObject(event.target.value);
+	        });
+	    });
+	
+	    document.getElementById('removeShape').addEventListener('click', function (event) {
+	        engine.removeObject();
 	    });
 	};
 	
@@ -104,9 +122,9 @@
 	
 	var _BasicTorus2 = _interopRequireDefault(_BasicTorus);
 	
-	var _BasicCubus = __webpack_require__(7);
+	var _BasicCube = __webpack_require__(7);
 	
-	var _BasicCubus2 = _interopRequireDefault(_BasicCubus);
+	var _BasicCube2 = _interopRequireDefault(_BasicCube);
 	
 	var _Renderer = __webpack_require__(8);
 	
@@ -125,6 +143,9 @@
 	var Engine = function () {
 	    function Engine() {
 	        _classCallCheck(this, Engine);
+	
+	        this.shape;
+	        this.scene;
 	    }
 	
 	    _createClass(Engine, [{
@@ -152,8 +173,6 @@
 	        value: function setupScene() {
 	            this.scene = new THREE.Scene();
 	
-	            _EntityManager2.default.addEntity(new _BasicTorus2.default('shape', this.scene, new THREE.Vector3(0, 0, -1.5)));
-	
 	            var light = new THREE.PointLight(0xffff00, 1, 100);
 	            light.position.set(5, 5, 5);
 	            this.scene.add(light);
@@ -179,10 +198,18 @@
 	        }
 	    }, {
 	        key: 'changeObject',
-	        value: function changeObject() {
-	            var entity = _EntityManager2.default.findByName('shape');
-	            _EntityManager2.default.removeEntity(entity);
-	            _EntityManager2.default.addEntity(new _BasicCubus2.default('shape', this.scene, new THREE.Vector3(0, 0, -1.5)));
+	        value: function changeObject(type) {
+	            if (type === "cube") {
+	                _EntityManager2.default.addEntity(new _BasicCube2.default('cube', this.scene, new THREE.Vector3(0, 0, -2.5)));
+	            } else if (type === "torus") {
+	                this.shape = new _BasicTorus2.default('torus', this.scene, new THREE.Vector3(0, 0, -2.5));
+	                _EntityManager2.default.addEntity(this.shape);
+	            }
+	        }
+	    }, {
+	        key: 'removeObject',
+	        value: function removeObject() {
+	            // const entity = entityManager.findByName('torus');
 	        }
 	    }, {
 	        key: 'startUpdate',
@@ -48206,14 +48233,13 @@
 	            torus.position.copy(initialPosition);
 	            scene.add(torus);
 	
-	            setTimeout(function () {
-	                scene.remove(torus);
-	            }, 2000);
 	            return torus;
 	        }
 	    }, {
 	        key: 'update',
-	        value: function update() {}
+	        value: function update() {
+	            this.mesh.rotateY(0.1);
+	        }
 	    }, {
 	        key: 'dispose',
 	        value: function dispose() {
@@ -48274,7 +48300,9 @@
 	        }
 	    }, {
 	        key: 'update',
-	        value: function update() {}
+	        value: function update() {
+	            this.mesh.rotateX(0.1);
+	        }
 	    }, {
 	        key: 'dispose',
 	        value: function dispose() {

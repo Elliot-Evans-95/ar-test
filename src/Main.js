@@ -5,13 +5,31 @@ class Main {
         engine.start();
         document.getElementsByName('updateColor').forEach((button) => {
             button.addEventListener('click', function (event) {
-                engine.changeColor('shape', parseInt(event.target.value, 16));
+                engine.changeColor('torus', parseInt(event.target.value, 16));
             });
         });
 
-        document.getElementById('updateShape').addEventListener('click', () => {
-            engine.changeObject();
-        })
+        document.getElementsByName('updateColor').forEach((button) => {
+            button.addEventListener('click', function (event) {
+                engine.changeColor('cube', parseInt(event.target.value, 16));
+            });
+        });
+
+        document.getElementsByName('updateShape').forEach((button) => {
+            button.addEventListener('click', function (event) {
+                engine.changeObject(event.target.value);
+            });
+        });
+
+        document.getElementsByName('scaleShape').forEach((button) => {
+            button.addEventListener('click', function (event) {
+                engine.changeObject(event.target.value);
+            });
+        });
+
+        document.getElementById('removeShape').addEventListener('click', (event) => {
+            engine.removeObject();
+        });
     }
 }
 
